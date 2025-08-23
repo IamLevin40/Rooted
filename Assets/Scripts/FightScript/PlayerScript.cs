@@ -23,6 +23,8 @@ public class PlayerScript : MonoBehaviour
     private int displayedScore = 0;
     private float currentLerpSpeed = 10f;
 
+    public GameplayScript gameplay;
+
     private void Start()
     {
         currentHealth = maxHealth;
@@ -38,6 +40,11 @@ public class PlayerScript : MonoBehaviour
     {
         AnimateHealth();
         AnimateScore();
+    }
+
+    private bool CanUpdate()
+    {
+        return gameplay != null && gameplay.gameActive && !gameplay.gameEnded;
     }
 
     private void AnimateHealth()
@@ -74,12 +81,14 @@ public class PlayerScript : MonoBehaviour
 
     public void AddHealth(float amount)
     {
+        if (!CanUpdate()) return;
         currentHealth = Mathf.Clamp(currentHealth + amount, 0, maxHealth);
         UpdateHealthUI();
     }
 
     public void SubtractHealth(float amount)
     {
+        if (!CanUpdate()) return;
         currentHealth = Mathf.Clamp(currentHealth - amount, 0, maxHealth);
         UpdateHealthUI();
     }
@@ -94,11 +103,13 @@ public class PlayerScript : MonoBehaviour
 
     public void AddScore(int amount)
     {
+        if (!CanUpdate()) return;
         score = Mathf.Max(0, score + amount);
     }
 
     public void SubtractScore(int amount)
     {
+        if (!CanUpdate()) return;
         score = Mathf.Max(0, score - amount);
     }
 

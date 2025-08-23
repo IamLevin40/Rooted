@@ -14,6 +14,8 @@ public class EnemyScript : MonoBehaviour
     private float displayedHealth;
     private float currentHealthLerpSpeed = 10f;
 
+    public GameplayScript gameplay;
+
     private void Start()
     {
         currentHealth = maxHealth;
@@ -22,27 +24,14 @@ public class EnemyScript : MonoBehaviour
         UpdateHealthUI();
     }
 
-    public void AddHealth(float amount)
-    {
-        currentHealth = Mathf.Clamp(currentHealth + amount, 0, maxHealth);
-    }
-
-    public void SubtractHealth(float amount)
-    {
-        currentHealth = Mathf.Clamp(currentHealth - amount, 0, maxHealth);
-    }
-
-    private void UpdateHealthUI()
-    {
-        if (healthBar != null)
-            healthBar.value = displayedHealth / maxHealth;
-        if (healthText != null)
-            healthText.text = displayedHealth.ToString("F0");
-    }
-
     private void Update()
     {
         AnimateHealth();
+    }
+
+    private bool CanUpdate()
+    {
+        return gameplay != null && gameplay.gameActive && !gameplay.gameEnded;
     }
 
     private void AnimateHealth()
@@ -59,5 +48,25 @@ public class EnemyScript : MonoBehaviour
         {
             currentHealthLerpSpeed = Mathf.Lerp(currentHealthLerpSpeed, healthLerpSpeed, healthLerpEase * Time.deltaTime);
         }
+    }
+
+    public void AddHealth(float amount)
+    {
+        if (!CanUpdate()) return;
+        currentHealth = Mathf.Clamp(currentHealth + amount, 0, maxHealth);
+    }
+
+    public void SubtractHealth(float amount)
+    {
+        if (!CanUpdate()) return;
+        currentHealth = Mathf.Clamp(currentHealth - amount, 0, maxHealth);
+    }
+
+    private void UpdateHealthUI()
+    {
+        if (healthBar != null)
+            healthBar.value = displayedHealth / maxHealth;
+        if (healthText != null)
+            healthText.text = displayedHealth.ToString("F0");
     }
 }
