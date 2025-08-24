@@ -16,17 +16,27 @@ public class EnemyScript : MonoBehaviour
 
     public GameplayScript gameplay;
 
+    [Header("Projectile Settings")]
+    public GameObject projectilePrefab;
+    public PlayerScript player;
+    public float projectileCooldown = 1f;
+    private float projectileTimer = 0f;
+    private GameObject currentProjectile = null;
+
     private void Start()
     {
         currentHealth = maxHealth;
         displayedHealth = currentHealth;
         currentHealthLerpSpeed = healthLerpSpeed;
         UpdateHealthUI();
+        projectileTimer = 0f;
+        currentProjectile = null;
     }
 
     private void Update()
     {
         AnimateHealth();
+        HandleProjectileSpawning();
     }
 
     private bool CanUpdate()
@@ -47,6 +57,51 @@ public class EnemyScript : MonoBehaviour
         else
         {
             currentHealthLerpSpeed = Mathf.Lerp(currentHealthLerpSpeed, healthLerpSpeed, healthLerpEase * Time.deltaTime);
+        }
+    }
+
+    private void HandleProjectileSpawning()
+    {
+        if (!CanUpdate() || projectilePrefab == null || player == null) return;
+
+        // If no projectile exists, start cooldown and spawn after 1s
+        if (currentProjectile == null)
+        {
+            projectileTimer += Time.deltaTime;
+            if (projectileTimer >= projectileCooldown)
+            {
+                projectileTimer = 0f;
+                SpawnProjectile();
+            }
+        }
+    }
+
+    private void SpawnProjectile()
+    {
+        // Randomly choose left or right
+        bool right = Random.value > 0.5f;
+        float minOffset = 1.0f, maxOffset = 2.5f;
+        float xOffset = (right ? 1 : -1) * Random.Range(minOffset, maxOffset);
+        float yOffset = Random.Range(-0.5f, 0.5f);
+        Vector3 spawnPos = transform.position + new Vector3(xOffset, yOffset, 0);
+        GameObject proj = Instantiate(projectilePrefab, spawnPos, Quaternion.identity, this.transform);
+        currentProjectile = proj;
+        EnemyProjectile ep = proj.GetComponent<EnemyProjectile>();
+        if (ep != null)
+        {
+            ep.moveRight = right;
+            ep.enemy = this;
+            ep.player = player;
+            ep.spawnOrigin = spawnPos;
+        }
+    }
+
+    // Called by projectile when destroyed
+    public void OnProjectileDestroyed(GameObject proj)
+    {
+        if (currentProjectile == proj)
+        {
+            currentProjectile = null;
         }
     }
 

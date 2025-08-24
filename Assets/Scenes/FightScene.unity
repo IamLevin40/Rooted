@@ -194,6 +194,150 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 48385498}
   m_CullTransparentMesh: 1
+--- !u!1 &132529987
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 132529988}
+  - component: {fileID: 132529990}
+  - component: {fileID: 132529989}
+  - component: {fileID: 132529991}
+  - component: {fileID: 132529992}
+  m_Layer: 5
+  m_Name: Projectile
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &132529988
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 132529987}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1439732983}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0.5, y: 0.5}
+  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchoredPosition: {x: 0, y: 190}
+  m_SizeDelta: {x: 100, y: 100}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &132529989
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 132529987}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
+  m_Material: {fileID: 0}
+  m_Color: {r: 0.06314525, g: 0.06486809, b: 0.103773594, a: 1}
+  m_RaycastTarget: 1
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_Maskable: 1
+  m_OnCullStateChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  m_Sprite: {fileID: -6466518098925416102, guid: 48ff74b5e1e75b2469f33f230dc2d795, type: 3}
+  m_Type: 0
+  m_PreserveAspect: 0
+  m_FillCenter: 1
+  m_FillMethod: 4
+  m_FillAmount: 1
+  m_FillClockwise: 1
+  m_FillOrigin: 0
+  m_UseSpriteMesh: 0
+  m_PixelsPerUnitMultiplier: 1
+--- !u!222 &132529990
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 132529987}
+  m_CullTransparentMesh: 1
+--- !u!114 &132529991
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 132529987}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 85ee978997280014abbcb0acf43ccdb6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyProjectile
+  maxSpeed: 4
+  acceleration: 2
+  initialSpeed: 0
+  initialSlowDuration: 1
+  curveAmplitude: 1.2
+  curveFrequency: 1.2
+  moveRight: 1
+  enemy: {fileID: 0}
+  player: {fileID: 0}
+  spawnOrigin: {x: 0, y: 0, z: 0}
+  interactButton: {fileID: 132529992}
+--- !u!114 &132529992
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 132529987}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4e29b1a8efbd4b44bb3f3716e73f07ff, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Button
+  m_Navigation:
+    m_Mode: 3
+    m_WrapAround: 0
+    m_SelectOnUp: {fileID: 0}
+    m_SelectOnDown: {fileID: 0}
+    m_SelectOnLeft: {fileID: 0}
+    m_SelectOnRight: {fileID: 0}
+  m_Transition: 1
+  m_Colors:
+    m_NormalColor: {r: 1, g: 1, b: 1, a: 1}
+    m_HighlightedColor: {r: 0.9607843, g: 0.9607843, b: 0.9607843, a: 1}
+    m_PressedColor: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 1}
+    m_SelectedColor: {r: 0.9607843, g: 0.9607843, b: 0.9607843, a: 1}
+    m_DisabledColor: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 0.5019608}
+    m_ColorMultiplier: 1
+    m_FadeDuration: 0.1
+  m_SpriteState:
+    m_HighlightedSprite: {fileID: 0}
+    m_PressedSprite: {fileID: 0}
+    m_SelectedSprite: {fileID: 0}
+    m_DisabledSprite: {fileID: 0}
+  m_AnimationTriggers:
+    m_NormalTrigger: Normal
+    m_HighlightedTrigger: Highlighted
+    m_PressedTrigger: Pressed
+    m_SelectedTrigger: Selected
+    m_DisabledTrigger: Disabled
+  m_Interactable: 1
+  m_TargetGraphic: {fileID: 132529989}
+  m_OnClick:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!1 &132875369
 GameObject:
   m_ObjectHideFlags: 0
@@ -880,8 +1024,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c74ab62db4d9bf54eadd94e133f9be1f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GameplayScript
-  player: {fileID: 1245632389}
-  enemy: {fileID: 479944665}
+  player: {fileID: 475560764}
+  enemy: {fileID: 825734167}
   CountdownDisplay: {fileID: 596031076}
   dot1: {fileID: 2081626430}
   dot2: {fileID: 1852819563}
@@ -1227,6 +1371,7 @@ GameObject:
   - component: {fileID: 475560761}
   - component: {fileID: 475560763}
   - component: {fileID: 475560762}
+  - component: {fileID: 475560764}
   m_Layer: 5
   m_Name: Player
   m_TagString: Untagged
@@ -1291,57 +1436,30 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 475560760}
   m_CullTransparentMesh: 1
---- !u!1 &479944663
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 479944664}
-  - component: {fileID: 479944665}
-  m_Layer: 0
-  m_Name: EnemyScript
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &479944664
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 479944663}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 1121126055}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &479944665
+--- !u!114 &475560764
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 479944663}
+  m_GameObject: {fileID: 475560760}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5b20d08bd46c4d24fa5f4f59340e6479, type: 3}
+  m_Script: {fileID: 11500000, guid: c0fd414d36e149244b2f06cfa6b6b8e4, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::EnemyScript
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerScript
   maxHealth: 100
   currentHealth: 0
-  healthBar: {fileID: 1862900679}
-  healthText: {fileID: 1647659430}
+  healthBar: {fileID: 1817160067}
+  healthText: {fileID: 2084454383}
   healthLerpSpeed: 10
   maxHealthLerpSpeed: 1000
   healthLerpEase: 5
+  score: 0
+  scoreText: {fileID: 1087145485}
+  scoreLerpSpeed: 10
+  maxScoreLerpSpeed: 1000
+  lerpSpeedEase: 5
   gameplay: {fileID: 398502344}
 --- !u!1 &509043030
 GameObject:
@@ -2514,6 +2632,7 @@ GameObject:
   - component: {fileID: 825734164}
   - component: {fileID: 825734166}
   - component: {fileID: 825734165}
+  - component: {fileID: 825734167}
   m_Layer: 5
   m_Name: Enemy
   m_TagString: Untagged
@@ -2578,6 +2697,29 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 825734163}
   m_CullTransparentMesh: 1
+--- !u!114 &825734167
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 825734163}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5b20d08bd46c4d24fa5f4f59340e6479, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyScript
+  maxHealth: 100
+  currentHealth: 0
+  healthBar: {fileID: 1862900679}
+  healthText: {fileID: 1647659430}
+  healthLerpSpeed: 10
+  maxHealthLerpSpeed: 1000
+  healthLerpEase: 5
+  gameplay: {fileID: 398502344}
+  projectilePrefab: {fileID: 132529987}
+  player: {fileID: 475560764}
+  projectileCooldown: 1
 --- !u!1 &831992048
 GameObject:
   m_ObjectHideFlags: 0
@@ -3260,8 +3402,6 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 398502343}
-  - {fileID: 1245632388}
-  - {fileID: 479944664}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1131330133
@@ -3651,63 +3791,6 @@ MonoBehaviour:
   m_EffectColor: {r: 0, g: 0, b: 0, a: 1}
   m_EffectDistance: {x: 4, y: -4}
   m_UseGraphicAlpha: 1
---- !u!1 &1245632387
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1245632388}
-  - component: {fileID: 1245632389}
-  m_Layer: 0
-  m_Name: PlayerScript
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &1245632388
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1245632387}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 1121126055}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1245632389
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1245632387}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c0fd414d36e149244b2f06cfa6b6b8e4, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::PlayerScript
-  maxHealth: 100
-  currentHealth: 0
-  healthBar: {fileID: 1817160067}
-  healthText: {fileID: 2084454383}
-  healthLerpSpeed: 10
-  maxHealthLerpSpeed: 1000
-  healthLerpEase: 5
-  score: 0
-  scoreText: {fileID: 1087145485}
-  scoreLerpSpeed: 10
-  maxScoreLerpSpeed: 1000
-  lerpSpeedEase: 5
-  gameplay: {fileID: 398502344}
 --- !u!1 &1318246370
 GameObject:
   m_ObjectHideFlags: 0
@@ -4035,6 +4118,7 @@ RectTransform:
   m_LocalScale: {x: 0, y: 0, z: 0}
   m_ConstrainProportionsScale: 0
   m_Children:
+  - {fileID: 132529988}
   - {fileID: 964237036}
   - {fileID: 825734164}
   - {fileID: 475560761}
