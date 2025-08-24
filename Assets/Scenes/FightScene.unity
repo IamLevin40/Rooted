@@ -2008,6 +2008,8 @@ GameObject:
   m_Component:
   - component: {fileID: 579888574}
   - component: {fileID: 579888575}
+  - component: {fileID: 579888576}
+  - component: {fileID: 579888577}
   m_Layer: 0
   m_Name: WordBuildingScript
   m_TagString: Untagged
@@ -2045,19 +2047,47 @@ MonoBehaviour:
   WordBuildingDisplay: {fileID: 183004664}
   player: {fileID: 475560764}
   enemy: {fileID: 825734167}
+  validWordDetector: {fileID: 579888576}
   rootWordTile: {fileID: 761574181}
   prefixTile: {fileID: 509043030}
   suffixTile: {fileID: 695434345}
   rootWordText: {fileID: 1173310104}
   prefixText: {fileID: 843471982}
   suffixText: {fileID: 810551664}
-  meaningText: {fileID: 734231437}
+  definitionText: {fileID: 734231437}
   wordSubmitButton: {fileID: 1243012487}
   timerBar: {fileID: 2047960175}
   timerText: {fileID: 1554994496}
   maxTime: 20
   affixContent: {fileID: 301254500}
   affixTilePrefab: {fileID: 7433327320043755495, guid: 40e3a668d73aedc4a96b1f135edd1c09, type: 3}
+--- !u!114 &579888576
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 579888573}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5b3d4fddf7b2b524c8c578f8b1dd3257, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ValidWordDetectorScript
+--- !u!114 &579888577
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 579888573}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e41c2e709f28335489d0dc416c9a3fca, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::WordManager
+  FileValidWords: valid_words
+  FileEnvironmentalWords: environmental_words
+  FileGlossary: glossary
 --- !u!1 &596031076
 GameObject:
   m_ObjectHideFlags: 0
@@ -3947,7 +3977,7 @@ GameObject:
   - component: {fileID: 1166452267}
   - component: {fileID: 1166452266}
   m_Layer: 5
-  m_Name: MeaningDisplay
+  m_Name: DefinitionDisplay
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -5383,7 +5413,7 @@ GameObject:
   - component: {fileID: 1738111849}
   - component: {fileID: 1738111848}
   m_Layer: 5
-  m_Name: RootWordTile
+  m_Name: AffixTile
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
