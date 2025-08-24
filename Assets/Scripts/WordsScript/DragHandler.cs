@@ -8,6 +8,7 @@ public class DragHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
     private string affixText;
     private bool isDropZone;
     private bool isDragging = false;
+    private bool wasOriginallyPrefix; // Track if this tile was originally in prefix position
 
     public void Initialize(WordBuildingScript wordBuildingScript, string text, bool dropZone)
     {
@@ -28,6 +29,10 @@ public class DragHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
             if (text != null && !string.IsNullOrEmpty(text.text))
             {
                 affixText = text.text;
+                
+                // Determine if this is originally a prefix or suffix tile
+                wasOriginallyPrefix = wordBuilding.prefixTile == gameObject;
+                
                 wordBuilding.StartDrag(gameObject, affixText, eventData.position);
             }
         }
@@ -72,6 +77,7 @@ public class DragHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
             wordBuilding.RemoveAffix(gameObject);
         }
         
-        wordBuilding.EndDrag(wasDropped, isPrefix, affixText);
+        // Pass information about the original position to EndDrag
+        wordBuilding.EndDrag(wasDropped, isPrefix, affixText, isDropZone, wasOriginallyPrefix);
     }
 }

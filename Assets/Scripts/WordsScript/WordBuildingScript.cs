@@ -505,16 +505,34 @@ public class WordBuildingScript : MonoBehaviour
         }
     }
 
-    public void EndDrag(bool wasDropped, bool isPrefix = false, string droppedAffix = "")
+    public void EndDrag(bool wasDropped, bool isPrefix = false, string droppedAffix = "", bool wasFromDropZone = false, bool wasOriginallyPrefix = false)
     {
         if (currentDraggedTile != null)
         {
             if (wasDropped)
             {
+                // Set the new position
                 if (isPrefix)
                     SetPrefix(droppedAffix);
                 else
                     SetSuffix(droppedAffix);
+                
+                // If dragging from one drop zone to another, clear the original position
+                if (wasFromDropZone)
+                {
+                    // If moved to different zone, clear the original
+                    if (wasOriginallyPrefix && !isPrefix)
+                    {
+                        // Moved from prefix to suffix, clear prefix
+                        SetPrefix("");
+                    }
+                    else if (!wasOriginallyPrefix && isPrefix)
+                    {
+                        // Moved from suffix to prefix, clear suffix
+                        SetSuffix("");
+                    }
+                    // If moved to same zone (wasOriginallyPrefix == isPrefix), don't clear anything
+                }
             }
 
             Destroy(currentDraggedTile);
