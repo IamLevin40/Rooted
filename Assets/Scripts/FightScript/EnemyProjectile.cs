@@ -126,14 +126,10 @@ public class EnemyProjectile : MonoBehaviour
 
     public void OnProjectileInteract()
     {
-        if (enemy != null)
-        {
-            enemy.SubtractHealth(projectileDamage);
-            enemy.OnProjectileDestroyed(gameObject);
-        }
         if (player != null)
         {
             player.rootWord = rootWord;
+            player.TriggerWordBuilding();
             Debug.Log($"Projectile was interacted, root word: {rootWord}");
         }
         else

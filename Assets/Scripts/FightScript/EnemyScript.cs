@@ -90,6 +90,9 @@ public class EnemyScript : MonoBehaviour
     {
         if (!CanUpdate() || projectilePrefab == null || player == null) return;
 
+        // Prevent spawning if player is in word building phase
+        if (player.onWordBuildingPhase) return;
+
         if (currentProjectile == null)
         {
             projectileTimer += Time.deltaTime;
