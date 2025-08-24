@@ -30,6 +30,8 @@ public class PlayerScript : MonoBehaviour
     #region Root Word & Gameplay
     public string rootWord = "";
     public GameplayScript gameplay;
+    public WordBuildingScript wordBuilding;
+    public bool onWordBuildingPhase = false;
     #endregion
 
     #region Unity Methods
@@ -131,6 +133,20 @@ public class PlayerScript : MonoBehaviour
     private bool CanUpdate()
     {
         return gameplay != null && gameplay.gameActive && !gameplay.gameEnded;
+    }
+    
+    public void TriggerWordBuilding()
+    {
+        onWordBuildingPhase = true;
+        if (wordBuilding != null)
+        {
+            wordBuilding.OnStartWordBuilding(rootWord);
+        }
+    }
+
+    public void EndWordBuilding()
+    {
+        onWordBuildingPhase = false;
     }
     #endregion
 }
