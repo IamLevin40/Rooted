@@ -30,6 +30,7 @@ public class PlayerScript : MonoBehaviour
     #region Root Word & Gameplay
     public string rootWord = "";
     public string playWord = "";
+    public bool isEnvironmentalWord = false;
     public float queueDamage = 0f;
     public int queueScore = 0;
     public GameplayScript gameplay;

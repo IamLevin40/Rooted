@@ -190,7 +190,7 @@ public class WordBuildingScript : MonoBehaviour
             player.playWord = playWord;
             Debug.Log($"Player word updated: {playWord}");
             CalculateAndUpdateQueueValues(playWord);
-            Debug.Log($"Queue Damage: {player.queueDamage}, Queue Score: {player.queueScore} for word: {playWord}");
+            Debug.Log($"Queue Damage: {player.queueDamage}, Queue Score: {player.queueScore} for word: {playWord}; Environmental: {player.isEnvironmentalWord}");
         }
     }
 
@@ -213,6 +213,7 @@ public class WordBuildingScript : MonoBehaviour
 
             player.queueDamage = finalDamage;
             player.queueScore = finalScore;
+            player.isEnvironmentalWord = isEnvironmentalWord;
         }
     }
 
