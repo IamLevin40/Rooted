@@ -1544,6 +1544,7 @@ MonoBehaviour:
   maxScoreLerpSpeed: 1000
   lerpSpeedEase: 5
   rootWord: 
+  playWord: 
   gameplay: {fileID: 398502344}
   wordBuilding: {fileID: 579888575}
   onWordBuildingPhase: 0
@@ -1959,6 +1960,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::WordBuildingScript
   WordBuildingDisplay: {fileID: 183004664}
   player: {fileID: 475560764}
+  enemy: {fileID: 825734167}
   rootWordTile: {fileID: 761574181}
   prefixTile: {fileID: 509043030}
   suffixTile: {fileID: 695434345}
@@ -2170,8 +2172,8 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 2092140628}
   m_HandleRect: {fileID: 2092140627}
   m_Direction: 2
-  m_Value: 0
-  m_Size: 1
+  m_Value: 1
+  m_Size: 0.7619048
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:

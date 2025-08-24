@@ -8,6 +8,7 @@ public class WordBuildingScript : MonoBehaviour
     #region UI References
     public GameObject WordBuildingDisplay;
     public PlayerScript player;
+    public EnemyScript enemy;
 
     [Header("Tiles")]
     public GameObject rootWordTile;
@@ -134,15 +135,48 @@ public class WordBuildingScript : MonoBehaviour
 
     public void OnWordSubmit()
     {
-        // Combine prefix + root + suffix
         string combinedWord = currentPrefix + currentRootWord + currentSuffix;
-
-        // For testing purposes, print the combined word
+        
         Debug.Log($"Word submitted: {combinedWord} (Prefix: '{currentPrefix}', Root: '{currentRootWord}', Suffix: '{currentSuffix}')");
+        
+        // Check if the word is valid first
+        bool isValidWord = WordScoringScript.IsValidWord(combinedWord);
+        
+        if (isValidWord)
+        {
+            // Check if it's also an environmental word
+            bool isEnvironmentalWord = WordScoringScript.IsEnvironmentalWord(combinedWord);
+            
+            // Calculate base damage and score
+            int baseDamage = WordScoringScript.CalculateDamage(combinedWord);
+            int baseScore = WordScoringScript.CalculateWordScore(combinedWord);
+            
+            // Apply multiplier for environmental words
+            int finalDamage = isEnvironmentalWord ? baseDamage * 2 : baseDamage;
+            int finalScore = isEnvironmentalWord ? baseScore * 2 : baseScore;
+            
+            // Apply damage to enemy
+            if (enemy != null)
+            {
+                enemy.SubtractHealth(finalDamage);
+                string wordType = isEnvironmentalWord ? "environmental" : "valid";
+                Debug.Log($"Enemy takes {finalDamage} damage from {wordType} word: {combinedWord}");
+            }
+            
+            // Add score to player
+            if (player != null)
+            {
+                player.AddScore(finalScore);
+                string wordType = isEnvironmentalWord ? "environmental" : "valid";
+                Debug.Log($"Player gains {finalScore} points from {wordType} word: {combinedWord}");
+            }
+        }
+        else
+        {
+            Debug.Log($"Invalid word: {combinedWord} - No damage or score awarded");
+        }
 
-        // TODO: Add logic for word validation and scoring
-
-        // End word building phase
+        // Reset tiles and end word building phase
         if (prefixTile != null) SetTileComponentsEnabled(prefixTile, false);
         if (suffixTile != null) SetTileComponentsEnabled(suffixTile, false);
         OnEndWordBuilding();
