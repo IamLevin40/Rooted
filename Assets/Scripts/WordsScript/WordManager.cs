@@ -17,6 +17,12 @@ public class WordInfo
         IsEnviromental = false;
     }
 
+    public WordInfo(bool isEnviromental)
+    {
+        Definition = null;
+        IsEnviromental = isEnviromental;
+    }
+
     public WordInfo(string definition, bool isEnviromental)
     {
         Definition = definition;
@@ -46,6 +52,15 @@ public class WordManager : MonoBehaviour
         }
     }
 
+    public void LoadWords()
+    {
+        LoadValidWords();
+        LoadGlossaryWords();
+        LoadEnvironmentalWords();
+
+        Debug.Log($"Total words stored: {wordMap.Keys.Count}");
+    }
+
     private void LoadValidWords()
     {
         string filePath = "ExternalFiles/" + FileValidWords;
@@ -64,6 +79,35 @@ public class WordManager : MonoBehaviour
 
             if (string.IsNullOrEmpty(word) || wordMap.ContainsKey(word)) continue;
             wordMap.Add(word, new WordInfo());
+        }
+    }
+
+    private void LoadEnvironmentalWords()
+    {
+        string filePath = "ExternalFiles/" + FileEnvironmentalWords;
+        TextAsset file = Resources.Load<TextAsset>(filePath);
+
+        if (file == null)
+        {
+            Debug.LogError($"File not found in Resources: {filePath}");
+            return;
+        }
+
+        string[] rawLines = file.text.Split("\n");
+        foreach (string line in rawLines)
+        {
+            string word = line.Trim();
+
+            if (string.IsNullOrEmpty(word)) continue;
+
+            if (wordMap.ContainsKey(word))
+            {
+                wordMap[word].IsEnviromental = true;
+            }
+            else
+            {
+                wordMap.Add(word, new WordInfo(true));
+            }
         }
     }
 
