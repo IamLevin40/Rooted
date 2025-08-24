@@ -3,6 +3,7 @@ using UnityEngine.UI;
 
 public class PlayerScript : MonoBehaviour
 {
+    #region Health Fields
     [Header("Health Settings")]
     public float maxHealth = 100f;
     public float currentHealth;
@@ -13,7 +14,9 @@ public class PlayerScript : MonoBehaviour
     public float healthLerpEase = 5f;
     private float displayedHealth;
     private float currentHealthLerpSpeed = 10f;
+    #endregion
 
+    #region Score Fields
     [Header("Score Settings")]
     public int score = 0;
     public Text scoreText;
@@ -22,9 +25,14 @@ public class PlayerScript : MonoBehaviour
     public float lerpSpeedEase = 5f;
     private int displayedScore = 0;
     private float currentLerpSpeed = 10f;
+    #endregion
 
+    #region Root Word & Gameplay
+    public string rootWord = "";
     public GameplayScript gameplay;
+    #endregion
 
+    #region Unity Methods
     private void Start()
     {
         currentHealth = maxHealth;
@@ -41,12 +49,9 @@ public class PlayerScript : MonoBehaviour
         AnimateHealth();
         AnimateScore();
     }
+    #endregion
 
-    private bool CanUpdate()
-    {
-        return gameplay != null && gameplay.gameActive && !gameplay.gameEnded;
-    }
-
+    #region Health Methods
     private void AnimateHealth()
     {
         if (Mathf.Abs(displayedHealth - currentHealth) > 0.01f)
@@ -60,22 +65,6 @@ public class PlayerScript : MonoBehaviour
         else
         {
             currentHealthLerpSpeed = Mathf.Lerp(currentHealthLerpSpeed, healthLerpSpeed, healthLerpEase * Time.deltaTime);
-        }
-    }
-
-    private void AnimateScore()
-    {
-        if (displayedScore != score)
-        {
-            int gap = Mathf.Abs(score - displayedScore);
-            float targetLerpSpeed = Mathf.Lerp(scoreLerpSpeed, maxScoreLerpSpeed, Mathf.Clamp01(gap / 100f));
-            currentLerpSpeed = Mathf.Lerp(currentLerpSpeed, targetLerpSpeed, lerpSpeedEase * Time.deltaTime);
-            displayedScore = (int)Mathf.MoveTowards(displayedScore, score, Mathf.Ceil(currentLerpSpeed * Time.deltaTime));
-            UpdateScoreUI();
-        }
-        else
-        {
-            currentLerpSpeed = Mathf.Lerp(currentLerpSpeed, scoreLerpSpeed, lerpSpeedEase * Time.deltaTime);
         }
     }
 
@@ -100,6 +89,24 @@ public class PlayerScript : MonoBehaviour
         if (healthText != null)
             healthText.text = displayedHealth.ToString("F0");
     }
+    #endregion
+
+    #region Score Methods
+    private void AnimateScore()
+    {
+        if (displayedScore != score)
+        {
+            int gap = Mathf.Abs(score - displayedScore);
+            float targetLerpSpeed = Mathf.Lerp(scoreLerpSpeed, maxScoreLerpSpeed, Mathf.Clamp01(gap / 100f));
+            currentLerpSpeed = Mathf.Lerp(currentLerpSpeed, targetLerpSpeed, lerpSpeedEase * Time.deltaTime);
+            displayedScore = (int)Mathf.MoveTowards(displayedScore, score, Mathf.Ceil(currentLerpSpeed * Time.deltaTime));
+            UpdateScoreUI();
+        }
+        else
+        {
+            currentLerpSpeed = Mathf.Lerp(currentLerpSpeed, scoreLerpSpeed, lerpSpeedEase * Time.deltaTime);
+        }
+    }
 
     public void AddScore(int amount)
     {
@@ -118,4 +125,12 @@ public class PlayerScript : MonoBehaviour
         if (scoreText != null)
             scoreText.text = displayedScore.ToString("D5");
     }
+    #endregion
+
+    #region Utility
+    private bool CanUpdate()
+    {
+        return gameplay != null && gameplay.gameActive && !gameplay.gameEnded;
+    }
+    #endregion
 }
