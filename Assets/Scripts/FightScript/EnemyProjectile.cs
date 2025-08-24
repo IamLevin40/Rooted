@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.UI;
+using System.Collections.Generic;
 
 public class EnemyProjectile : MonoBehaviour
 {
@@ -17,6 +18,9 @@ public class EnemyProjectile : MonoBehaviour
     private float t = 0f;
     private float currentSpeed = 0f;
     public Button interactButton;
+    public Text wordText;
+    public string rootWord = "";
+    private static List<string> rootWordsList;
 
     private void Start()
     {
@@ -25,6 +29,7 @@ public class EnemyProjectile : MonoBehaviour
             interactButton.onClick.AddListener(OnProjectileInteract);
         }
         currentSpeed = initialSpeed;
+        SetRandomRootWord();
     }
 
     private void Update()
@@ -34,6 +39,40 @@ public class EnemyProjectile : MonoBehaviour
         t += Time.deltaTime;
         UpdateProjectileMovement(playerTransform);
         CheckPlayerCollision(playerTransform);
+    }
+
+    private void SetRandomRootWord()
+    {
+        if (rootWordsList == null)
+        {
+            rootWordsList = new List<string>();
+            // Load from Resources/ExternalFiles/rootwords_list.txt
+            TextAsset txt = Resources.Load<TextAsset>("ExternalFiles/rootwords_list");
+            if (txt != null)
+            {
+                using (System.IO.StringReader reader = new System.IO.StringReader(txt.text))
+                {
+                    string line;
+                    while ((line = reader.ReadLine()) != null)
+                    {
+                        if (!string.IsNullOrWhiteSpace(line))
+                            rootWordsList.Add(line.Trim());
+                    }
+                }
+            }
+        }
+        if (rootWordsList != null && rootWordsList.Count > 0)
+        {
+            int idx = Random.Range(0, rootWordsList.Count);
+            rootWord = rootWordsList[idx];
+            if (wordText == null)
+            {
+                // Try to find Text component in children
+                wordText = GetComponentInChildren<Text>();
+            }
+            if (wordText != null)
+                wordText.text = rootWord;
+        }
     }
 
     private void UpdateProjectileMovement(Transform playerTransform)
@@ -71,6 +110,7 @@ public class EnemyProjectile : MonoBehaviour
         {
             player.SubtractHealth(5);
             hasHitPlayer = true;
+            if (player != null) player.rootWord = "";
             if (enemy != null) enemy.OnProjectileDestroyed(gameObject);
             Destroy(gameObject);
         }
@@ -84,7 +124,15 @@ public class EnemyProjectile : MonoBehaviour
             enemy.SubtractHealth(5);
             enemy.OnProjectileDestroyed(gameObject);
         }
-        Debug.Log("Projectile was interacted");
+        if (player != null)
+        {
+            player.rootWord = rootWord;
+            Debug.Log($"Projectile was interacted, root word: {rootWord}");
+        }
+        else
+        {
+            Debug.Log("Projectile was interacted");
+        }
         Destroy(gameObject);
     }
 

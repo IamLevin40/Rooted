@@ -14,14 +14,14 @@ public class EnemyScript : MonoBehaviour
     private float displayedHealth;
     private float currentHealthLerpSpeed = 10f;
 
-    public GameplayScript gameplay;
-
     [Header("Projectile Settings")]
     public GameObject projectilePrefab;
     public PlayerScript player;
     public float projectileCooldown = 1f;
     private float projectileTimer = 0f;
     private GameObject currentProjectile = null;
+
+    public GameplayScript gameplay;
 
     private void Start()
     {

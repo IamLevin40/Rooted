@@ -23,6 +23,7 @@ public class PlayerScript : MonoBehaviour
     private int displayedScore = 0;
     private float currentLerpSpeed = 10f;
 
+    public string rootWord = "";
     public GameplayScript gameplay;
 
     private void Start()
