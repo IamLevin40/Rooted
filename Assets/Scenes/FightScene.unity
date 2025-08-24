@@ -1545,6 +1545,9 @@ MonoBehaviour:
   lerpSpeedEase: 5
   rootWord: 
   playWord: 
+  isEnvironmentalWord: 0
+  queueDamage: 0
+  queueScore: 0
   gameplay: {fileID: 398502344}
   wordBuilding: {fileID: 579888575}
   onWordBuildingPhase: 0
@@ -2050,6 +2053,9 @@ MonoBehaviour:
   suffixText: {fileID: 810551664}
   meaningText: {fileID: 734231437}
   wordSubmitButton: {fileID: 1243012487}
+  timerBar: {fileID: 2047960175}
+  timerText: {fileID: 1554994496}
+  maxTime: 20
   affixContent: {fileID: 301254500}
   affixTilePrefab: {fileID: 7433327320043755495, guid: 40e3a668d73aedc4a96b1f135edd1c09, type: 3}
 --- !u!1 &596031076
@@ -4910,7 +4916,7 @@ GameObject:
   - component: {fileID: 1554994497}
   - component: {fileID: 1554994496}
   m_Layer: 5
-  m_Name: HPText
+  m_Name: TimerText
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
