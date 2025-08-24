@@ -87,7 +87,6 @@ public class CustomTileCreatingScript : MonoBehaviour
     {
         currentCustomAffix += letter.ToString();
         UpdateCustomAffixDisplay();
-        Debug.Log($"Letter clicked: {letter}, Current affix: {currentCustomAffix}");
     }
 
     private void OnBackspaceClicked()
@@ -96,7 +95,6 @@ public class CustomTileCreatingScript : MonoBehaviour
         {
             currentCustomAffix = currentCustomAffix.Substring(0, currentCustomAffix.Length - 1);
             UpdateCustomAffixDisplay();
-            Debug.Log($"Backspace clicked, Current affix: {currentCustomAffix}");
         }
     }
 
@@ -105,16 +103,16 @@ public class CustomTileCreatingScript : MonoBehaviour
         if (!string.IsNullOrEmpty(currentCustomAffix))
         {
             Debug.Log($"Custom tile submitted: {currentCustomAffix}");
-            
+
             // Add the custom affix to the word building script
             if (wordBuildingScript != null)
             {
-                wordBuildingScript.AddCustomAffix(currentCustomAffix);
+                wordBuildingScript.affixHandler.AddCustomAffix(currentCustomAffix);
             }
-            
+
             // Clear the custom affix
             ClearCustomAffix();
-            
+
             // Go back to yourTiles panel
             if (wordBuildingScript != null)
             {
