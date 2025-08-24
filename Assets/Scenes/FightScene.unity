@@ -669,7 +669,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &183004665
 RectTransform:
   m_ObjectHideFlags: 0
@@ -807,7 +807,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: -410}
+  m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0, y: 1}
 --- !u!114 &301254502
 MonoBehaviour:
@@ -1901,6 +1901,16 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::WordBuildingScript
   WordBuildingDisplay: {fileID: 183004664}
   player: {fileID: 475560764}
+  rootWordTile: {fileID: 761574181}
+  prefixTile: {fileID: 509043030}
+  suffixTile: {fileID: 695434345}
+  rootWordText: {fileID: 1173310104}
+  prefixText: {fileID: 843471982}
+  suffixText: {fileID: 810551664}
+  meaningText: {fileID: 734231437}
+  wordSubmitButton: {fileID: 1243012487}
+  affixContent: {fileID: 301254500}
+  affixTilePrefab: {fileID: 7433327320043755495, guid: 40e3a668d73aedc4a96b1f135edd1c09, type: 3}
 --- !u!1 &596031076
 GameObject:
   m_ObjectHideFlags: 0
@@ -2887,9 +2897,9 @@ RectTransform:
   m_Father: {fileID: 2122250291}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 1, y: 1}
+  m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: -17, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0, y: 1}
 --- !u!114 &831992050
 MonoBehaviour:
@@ -3345,7 +3355,7 @@ RectTransform:
   m_Father: {fileID: 2047960174}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 1, y: 1}
+  m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
@@ -6065,7 +6075,7 @@ RectTransform:
   m_Father: {fileID: 750777358}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 1, y: 1}
+  m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 20, y: 20}
   m_Pivot: {x: 0.5, y: 0.5}
