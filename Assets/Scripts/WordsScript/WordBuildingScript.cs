@@ -125,36 +125,19 @@ public class WordBuildingScript : MonoBehaviour
     {
         string combinedWord = currentPrefix + currentRootWord + currentSuffix;
 
-        Debug.Log($"Word submitted: {combinedWord} (Prefix: '{currentPrefix}', Root: '{currentRootWord}', Suffix: '{currentSuffix}')");
-
         // Check if the word is valid first
         bool isValidWord = WordScoringScript.IsValidWord(combinedWord);
 
         if (isValidWord)
         {
-            if (WordBuildingDisplay != null)
-            {
-                WordBuildingDisplay.SetActive(false);
-            }
+            if (WordBuildingDisplay != null) WordBuildingDisplay.SetActive(false);
 
-            // Check if it's also an environmental word
-            bool isEnvironmentalWord = WordScoringScript.IsEnvironmentalWord(combinedWord);
-
-            // Calculate base damage and score
-            int baseDamage = WordScoringScript.CalculateDamage(combinedWord);
-            int baseScore = WordScoringScript.CalculateWordScore(combinedWord);
-
-            // Apply multiplier for environmental words
-            int finalDamage = isEnvironmentalWord ? baseDamage * 2 : baseDamage;
-            int finalScore = isEnvironmentalWord ? baseScore * 2 : baseScore;
+            // Use the queue values instead of recalculating
+            float finalDamage = player.queueDamage;
+            int finalScore = player.queueScore;
 
             // Spawn projectile instead of immediately applying damage/score
-            if (player != null)
-            {
-                string wordType = isEnvironmentalWord ? "environmental" : "valid";
-                Debug.Log($"Spawning projectile for {wordType} word: {combinedWord} (Damage: {finalDamage}, Score: {finalScore})");
-                player.SpawnPlayerProjectile(finalDamage, finalScore);
-            }
+            if (player != null) player.SpawnPlayerProjectile(finalDamage, finalScore);
         }
         else
         {
@@ -203,7 +186,33 @@ public class WordBuildingScript : MonoBehaviour
     {
         if (player != null)
         {
-            player.UpdatePlayWord(currentPrefix, currentRootWord, currentSuffix);
+            string playWord = currentPrefix + currentRootWord + currentSuffix;
+            player.playWord = playWord;
+            Debug.Log($"Player word updated: {playWord}");
+            CalculateAndUpdateQueueValues(playWord);
+            Debug.Log($"Queue Damage: {player.queueDamage}, Queue Score: {player.queueScore} for word: {playWord}");
+        }
+    }
+
+    private void CalculateAndUpdateQueueValues(string playWord)
+    {
+        // Check if the word is valid first
+        bool isValidWord = WordScoringScript.IsValidWord(playWord);
+
+        if (isValidWord)
+        {
+            bool isEnvironmentalWord = WordScoringScript.IsEnvironmentalWord(playWord);
+
+            // Calculate base damage and score
+            int baseDamage = WordScoringScript.CalculateDamage(playWord);
+            int baseScore = WordScoringScript.CalculateWordScore(playWord);
+
+            // Apply multiplier for environmental words
+            int finalDamage = isEnvironmentalWord ? baseDamage * 2 : baseDamage;
+            int finalScore = isEnvironmentalWord ? baseScore * 2 : baseScore;
+
+            player.queueDamage = finalDamage;
+            player.queueScore = finalScore;
         }
     }
 

@@ -22,7 +22,7 @@ public class PlayerProjectile : MonoBehaviour
     #region Runtime Fields
     public Vector3 spawnOrigin;
     public string projectileWord = "";
-    public int damage = 0;
+    public float damage = 0;
     public int score = 0;
     private bool hasHitEnemy = false;
     private float t = 0f;

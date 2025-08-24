@@ -30,6 +30,8 @@ public class PlayerScript : MonoBehaviour
     #region Root Word & Gameplay
     public string rootWord = "";
     public string playWord = "";
+    public float queueDamage = 0f;
+    public int queueScore = 0;
     public GameplayScript gameplay;
     public WordBuildingScript wordBuilding;
     public bool onWordBuildingPhase = false;
@@ -157,13 +159,7 @@ public class PlayerScript : MonoBehaviour
         onWordBuildingPhase = false;
     }
 
-    public void UpdatePlayWord(string prefix, string root, string suffix)
-    {
-        playWord = prefix + root + suffix;
-        Debug.Log(playWord);
-    }
-
-    public void SpawnPlayerProjectile(int damage, int score)
+    public void SpawnPlayerProjectile(float damage, int score)
     {
         if (projectilePrefab == null || enemy == null) return;
 
