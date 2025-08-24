@@ -9,6 +9,7 @@ public class WordBuildingScript : MonoBehaviour
     public GameObject WordBuildingDisplay;
     public PlayerScript player;
     public EnemyScript enemy;
+    public ValidWordDetectorScript validWordDetector;
 
     [Header("Tiles")]
     public GameObject rootWordTile;
@@ -19,7 +20,7 @@ public class WordBuildingScript : MonoBehaviour
     public Text rootWordText;
     public Text prefixText;
     public Text suffixText;
-    public Text meaningText;
+    public Text definitionText;
 
     [Header("Submit Button")]
     public Button wordSubmitButton;
@@ -38,7 +39,7 @@ public class WordBuildingScript : MonoBehaviour
     private string currentRootWord = "";
     private string currentPrefix = "";
     private string currentSuffix = "";
-    private string currentMeaning = "";
+    private string currentDefinition = "";
     private List<string> affixesList;
     private GameObject currentDraggedTile;
     private Canvas canvas;
@@ -101,7 +102,7 @@ public class WordBuildingScript : MonoBehaviour
         // Clear prefix and suffix
         currentPrefix = "";
         currentSuffix = "";
-        currentMeaning = "";
+        currentDefinition = "";
 
         // Update UI
         UpdateWordDisplay();
@@ -128,10 +129,10 @@ public class WordBuildingScript : MonoBehaviour
             suffixText.text = currentSuffix;
         }
 
-        // Update meaning display
-        if (meaningText != null)
+        // Update definition display
+        if (definitionText != null)
         {
-            meaningText.text = currentMeaning;
+            definitionText.text = currentDefinition;
         }
     }
 
@@ -149,11 +150,8 @@ public class WordBuildingScript : MonoBehaviour
     {
         string combinedWord = currentPrefix + currentRootWord + currentSuffix;
 
-        // Stop the timer
-        StopTimer();
-
         // Check if the word is valid first
-        bool isValidWord = WordScoringScript.IsValidWord(combinedWord);
+        bool isValidWord = validWordDetector.IsValidWord(combinedWord);
 
         if (isValidWord)
         {
@@ -171,6 +169,9 @@ public class WordBuildingScript : MonoBehaviour
             Debug.Log($"Invalid word: {combinedWord} - No projectile spawned");
             return;
         }
+
+        // Stop the timer
+        StopTimer();
 
         // Reset tiles (but don't end word building yet for valid words - projectile will handle that)
         if (prefixTile != null) SetTileComponentsEnabled(prefixTile, false);
@@ -213,9 +214,27 @@ public class WordBuildingScript : MonoBehaviour
     {
         if (player != null)
         {
+            player.queueDamage = 0;
+            player.queueScore = 0;
+
+            if (string.IsNullOrEmpty(currentPrefix) && string.IsNullOrEmpty(currentSuffix))
+            {
+                Debug.Log("Only root word displayed.");
+                return;
+            }
+
             string playWord = currentPrefix + currentRootWord + currentSuffix;
+            bool isValidWord = validWordDetector.IsValidWord(playWord);
+
+            if (!isValidWord)
+            {
+                Debug.Log($"Invalid word: {playWord}");
+                return;
+            }
+
             player.playWord = playWord;
             Debug.Log($"Player word updated: {playWord}");
+
             CalculateAndUpdateQueueValues(playWord);
             Debug.Log($"Queue Damage: {player.queueDamage}, Queue Score: {player.queueScore} for word: {playWord}; Environmental: {player.isEnvironmentalWord}");
         }
@@ -223,25 +242,22 @@ public class WordBuildingScript : MonoBehaviour
 
     private void CalculateAndUpdateQueueValues(string playWord)
     {
-        // Check if the word is valid first
-        bool isValidWord = WordScoringScript.IsValidWord(playWord);
+        string wordDefinition = validWordDetector.GetWordDefinition(playWord);
+        SetDefinition(wordDefinition);
 
-        if (isValidWord)
-        {
-            bool isEnvironmentalWord = WordScoringScript.IsEnvironmentalWord(playWord);
+        bool isEnvironmentalWord = validWordDetector.IsEnvironmentalWord(playWord);
 
-            // Calculate base damage and score
-            int baseDamage = WordScoringScript.CalculateDamageToEnemy(playWord);
-            int baseScore = WordScoringScript.CalculateWordScore(playWord);
+        // Calculate base damage and score
+        int baseDamage = WordScoringScript.CalculateDamageToEnemy(playWord);
+        int baseScore = WordScoringScript.CalculateWordScore(playWord);
 
-            // Apply multiplier for environmental words
-            int finalDamage = isEnvironmentalWord ? baseDamage * 2 : baseDamage;
-            int finalScore = isEnvironmentalWord ? baseScore * 2 : baseScore;
+        // Apply multiplier for environmental words
+        int finalDamage = isEnvironmentalWord ? baseDamage * 2 : baseDamage;
+        int finalScore = isEnvironmentalWord ? baseScore * 2 : baseScore;
 
-            player.queueDamage = finalDamage;
-            player.queueScore = finalScore;
-            player.isEnvironmentalWord = isEnvironmentalWord;
-        }
+        player.queueDamage = finalDamage;
+        player.queueScore = finalScore;
+        player.isEnvironmentalWord = isEnvironmentalWord;
     }
 
     private void SetTileComponentsEnabled(GameObject tile, bool enabled)
@@ -268,9 +284,9 @@ public class WordBuildingScript : MonoBehaviour
         }
     }
 
-    public void SetMeaning(string meaning)
+    public void SetDefinition(string definition)
     {
-        currentMeaning = meaning;
+        currentDefinition = definition;
         UpdateWordDisplay();
     }
 

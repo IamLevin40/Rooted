@@ -46,18 +46,4 @@ public class WordScoringScript : MonoBehaviour
         }
         return totalScore;
     }
-
-    public static bool IsValidWord(string word)
-    {
-        // For now, assume all words are valid
-        // This will be replaced with actual word validation logic later
-        return !string.IsNullOrEmpty(word) && word.Length > 1;
-    }
-
-    public static bool IsEnvironmentalWord(string word)
-    {
-        // For now, assume all words are environmental-related
-        // This will be replaced with actual validation logic later
-        return true;
-    }
 }

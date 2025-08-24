@@ -66,7 +66,7 @@ public class WordManager : MonoBehaviour
         }
     }
 
-    public void LoadWords()
+    public void Start()
     {
         LoadValidWords();
         LoadGlossaryWords();
