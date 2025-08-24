@@ -80,9 +80,9 @@ public class EnemyScript : MonoBehaviour
     {
         // Randomly choose left or right
         bool right = Random.value > 0.5f;
-        float minOffset = 1.0f, maxOffset = 2.5f;
+        float minOffset = 1.5f, maxOffset = 2.5f;
         float xOffset = (right ? 1 : -1) * Random.Range(minOffset, maxOffset);
-        float yOffset = Random.Range(-0.5f, 0.5f);
+        float yOffset = Random.Range(0f, 0.75f);
         Vector3 spawnPos = transform.position + new Vector3(xOffset, yOffset, 0);
         GameObject proj = Instantiate(projectilePrefab, spawnPos, Quaternion.identity, this.transform);
         currentProjectile = proj;
