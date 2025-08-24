@@ -807,7 +807,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: -410}
   m_Pivot: {x: 0, y: 1}
 --- !u!114 &301254504
 MonoBehaviour:
@@ -2061,6 +2061,11 @@ MonoBehaviour:
   maxTime: 20
   affixContent: {fileID: 301254500}
   affixTilePrefab: {fileID: 7433327320043755495, guid: 40e3a668d73aedc4a96b1f135edd1c09, type: 3}
+  yourTiles: {fileID: 1590266493}
+  createCustomTiles: {fileID: 1615712012}
+  createCustomTileButton: {fileID: 426462959}
+  backButton: {fileID: 1478654290}
+  customTileCreating: {fileID: 1420943313}
 --- !u!114 &579888576
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3235,9 +3240,9 @@ RectTransform:
   m_Father: {fileID: 2122250291}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
+  m_AnchorMax: {x: 1, y: 1}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 0}
+  m_SizeDelta: {x: -17, y: 0}
   m_Pivot: {x: 0, y: 1}
 --- !u!114 &831992050
 MonoBehaviour:
@@ -3883,6 +3888,7 @@ Transform:
   m_Children:
   - {fileID: 398502343}
   - {fileID: 579888574}
+  - {fileID: 1420943312}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1131330133
@@ -4505,6 +4511,56 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1399274966}
   m_CullTransparentMesh: 1
+--- !u!1 &1420943311
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1420943312}
+  - component: {fileID: 1420943313}
+  m_Layer: 0
+  m_Name: CustomTileCreatingScript
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1420943312
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1420943311}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1121126055}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1420943313
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1420943311}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ac889ad300ed4b04c805a2b3518fd545, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CustomTileCreatingScript
+  letterButtonPrefab: {fileID: 7516462606967829352, guid: 949070397584f0948aa1cd7f164060b9, type: 3}
+  letterButtonsParent: {fileID: 1819783354}
+  customAffixText: {fileID: 1970461388}
+  backspaceButton: {fileID: 395542644}
+  submitButton: {fileID: 1013961567}
+  wordBuildingScript: {fileID: 579888575}
 --- !u!1 &1439732979
 GameObject:
   m_ObjectHideFlags: 0
@@ -4628,6 +4684,7 @@ GameObject:
   - component: {fileID: 1478654286}
   - component: {fileID: 1478654289}
   - component: {fileID: 1478654288}
+  - component: {fileID: 1478654290}
   - component: {fileID: 1478654287}
   m_Layer: 5
   m_Name: BackButton
@@ -4709,6 +4766,50 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1478654285}
   m_CullTransparentMesh: 1
+--- !u!114 &1478654290
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1478654285}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4e29b1a8efbd4b44bb3f3716e73f07ff, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Button
+  m_Navigation:
+    m_Mode: 3
+    m_WrapAround: 0
+    m_SelectOnUp: {fileID: 0}
+    m_SelectOnDown: {fileID: 0}
+    m_SelectOnLeft: {fileID: 0}
+    m_SelectOnRight: {fileID: 0}
+  m_Transition: 1
+  m_Colors:
+    m_NormalColor: {r: 1, g: 1, b: 1, a: 1}
+    m_HighlightedColor: {r: 0.9607843, g: 0.9607843, b: 0.9607843, a: 1}
+    m_PressedColor: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 1}
+    m_SelectedColor: {r: 0.9607843, g: 0.9607843, b: 0.9607843, a: 1}
+    m_DisabledColor: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 0.5019608}
+    m_ColorMultiplier: 1
+    m_FadeDuration: 0.1
+  m_SpriteState:
+    m_HighlightedSprite: {fileID: 0}
+    m_PressedSprite: {fileID: 0}
+    m_SelectedSprite: {fileID: 0}
+    m_DisabledSprite: {fileID: 0}
+  m_AnimationTriggers:
+    m_NormalTrigger: Normal
+    m_HighlightedTrigger: Highlighted
+    m_PressedTrigger: Pressed
+    m_SelectedTrigger: Selected
+    m_DisabledTrigger: Disabled
+  m_Interactable: 1
+  m_TargetGraphic: {fileID: 1478654288}
+  m_OnClick:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!1 &1517818580
 GameObject:
   m_ObjectHideFlags: 0
@@ -5103,7 +5204,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1590266494
 RectTransform:
   m_ObjectHideFlags: 0
@@ -5136,12 +5237,12 @@ GameObject:
   m_Component:
   - component: {fileID: 1615712013}
   m_Layer: 5
-  m_Name: CreateCustomTile
+  m_Name: CreateCustomTiles
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &1615712013
 RectTransform:
   m_ObjectHideFlags: 0
@@ -6414,7 +6515,7 @@ RectTransform:
   m_Father: {fileID: 750777358}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
+  m_AnchorMax: {x: 1, y: 1}
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 20, y: 20}
   m_Pivot: {x: 0.5, y: 0.5}

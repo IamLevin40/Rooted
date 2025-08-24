@@ -33,6 +33,13 @@ public class WordBuildingScript : MonoBehaviour
     [Header("Affix Tiles")]
     public GameObject affixContent;
     public GameObject affixTilePrefab;
+
+    [Header("Panel Management")]
+    public GameObject yourTiles;
+    public GameObject createCustomTiles;
+    public Button createCustomTileButton;
+    public Button backButton;
+    public CustomTileCreatingScript customTileCreating;
     #endregion
 
     #region Word Data
@@ -41,6 +48,7 @@ public class WordBuildingScript : MonoBehaviour
     private string currentSuffix = "";
     private string currentDefinition = "";
     private List<string> affixesList;
+    private List<string> customAffixesList; // Store custom affixes separately
     private GameObject currentDraggedTile;
     private Canvas canvas;
     private float currentTime;
@@ -62,6 +70,20 @@ public class WordBuildingScript : MonoBehaviour
         {
             wordSubmitButton.onClick.AddListener(OnWordSubmit);
         }
+
+        // Setup panel management buttons
+        if (createCustomTileButton != null)
+        {
+            createCustomTileButton.onClick.AddListener(OnCreateCustomTileClicked);
+        }
+
+        if (backButton != null)
+        {
+            backButton.onClick.AddListener(OnBackButtonClicked);
+        }
+
+        // Set default panel states
+        SetPanelStates(true); // Show yourTiles by default
 
         // Load affixes and create tiles
         LoadAffixes();
@@ -293,6 +315,7 @@ public class WordBuildingScript : MonoBehaviour
     private void LoadAffixes()
     {
         affixesList = new List<string>();
+        customAffixesList = new List<string>();
 
         // Load from Resources/ExternalFiles/affixes_list.txt
         TextAsset txt = Resources.Load<TextAsset>("ExternalFiles/affixes_list");
@@ -312,27 +335,61 @@ public class WordBuildingScript : MonoBehaviour
         {
             Debug.LogWarning("Could not load affixes_list.txt from Resources/ExternalFiles/");
         }
+
+        // Load custom affixes from PlayerPrefs
+        LoadCustomAffixes();
     }
 
     private void CreateAffixTiles()
     {
-        if (affixContent == null || affixTilePrefab == null || affixesList == null) return;
+        if (affixContent == null || affixTilePrefab == null) return;
 
-        foreach (string affix in affixesList)
+        // Clear existing tiles first
+        ClearAffixTiles();
+
+        // Create tiles for predefined affixes
+        if (affixesList != null)
         {
-            // Instantiate the affix tile prefab
-            GameObject affixTile = Instantiate(affixTilePrefab, affixContent.transform);
-
-            // Get the text component from the child
-            Text affixText = affixTile.GetComponentInChildren<Text>();
-            if (affixText != null)
+            foreach (string affix in affixesList)
             {
-                affixText.text = affix;
+                CreateSingleAffixTile(affix);
             }
-
-            // Add drag functionality to affix tile
-            AddDragFunctionality(affixTile, affix, false);
         }
+
+        // Create tiles for custom affixes
+        if (customAffixesList != null)
+        {
+            foreach (string customAffix in customAffixesList)
+            {
+                CreateSingleAffixTile(customAffix);
+            }
+        }
+    }
+
+    private void ClearAffixTiles()
+    {
+        // Clear all existing affix tiles
+        for (int i = affixContent.transform.childCount - 1; i >= 0; i--)
+        {
+            Transform child = affixContent.transform.GetChild(i);
+            DestroyImmediate(child.gameObject);
+        }
+    }
+
+    private void CreateSingleAffixTile(string affix)
+    {
+        // Instantiate the affix tile prefab
+        GameObject affixTile = Instantiate(affixTilePrefab, affixContent.transform);
+
+        // Get the text component from the child
+        Text affixText = affixTile.GetComponentInChildren<Text>();
+        if (affixText != null)
+        {
+            affixText.text = affix;
+        }
+
+        // Add drag functionality to affix tile
+        AddDragFunctionality(affixTile, affix, false);
     }
 
     private void SetupDropZones()
@@ -570,6 +627,120 @@ public class WordBuildingScript : MonoBehaviour
         {
             player.EndWordBuilding();
         }
+    }
+    #endregion
+
+    #region Panel Management
+    private void SetPanelStates(bool showYourTiles)
+    {
+        if (yourTiles != null)
+            yourTiles.SetActive(showYourTiles);
+        
+        if (createCustomTiles != null)
+            createCustomTiles.SetActive(!showYourTiles);
+    }
+
+    private void OnCreateCustomTileClicked()
+    {
+        SetPanelStates(false); // Hide yourTiles, show createCustomTiles
+        
+        // Initialize custom tile creation
+        if (customTileCreating != null)
+        {
+            customTileCreating.InitializeCustomTileCreation();
+        }
+    }
+
+    public void OnBackButtonClicked()
+    {
+        SetPanelStates(true); // Show yourTiles, hide createCustomTiles
+    }
+    #endregion
+
+    #region Custom Affix Management
+    private void LoadCustomAffixes()
+    {
+        // Load custom affixes from PlayerPrefs
+        string customAffixesString = PlayerPrefs.GetString("CustomAffixes", "");
+        
+        if (!string.IsNullOrEmpty(customAffixesString))
+        {
+            string[] customAffixesArray = customAffixesString.Split('|');
+            foreach (string customAffix in customAffixesArray)
+            {
+                if (!string.IsNullOrWhiteSpace(customAffix))
+                {
+                    customAffixesList.Add(customAffix.Trim());
+                }
+            }
+        }
+
+        Debug.Log($"Loaded {customAffixesList.Count} custom affixes from PlayerPrefs");
+    }
+
+    private void SaveCustomAffixes()
+    {
+        // Save custom affixes to PlayerPrefs
+        string customAffixesString = string.Join("|", customAffixesList.ToArray());
+        PlayerPrefs.SetString("CustomAffixes", customAffixesString);
+        PlayerPrefs.Save();
+        
+        Debug.Log($"Saved {customAffixesList.Count} custom affixes to PlayerPrefs");
+    }
+
+    public void AddCustomAffix(string newAffix)
+    {
+        if (string.IsNullOrWhiteSpace(newAffix))
+        {
+            Debug.LogWarning("Cannot add empty or whitespace custom affix");
+            return;
+        }
+
+        // Convert to uppercase for consistency
+        string normalizedAffix = newAffix.Trim().ToUpper();
+
+        // Check for duplicates in both predefined and custom affixes
+        bool isDuplicate = false;
+
+        // Check predefined affixes
+        foreach (string existingAffix in affixesList)
+        {
+            if (existingAffix.ToUpper() == normalizedAffix)
+            {
+                isDuplicate = true;
+                break;
+            }
+        }
+
+        // Check custom affixes if not already a duplicate
+        if (!isDuplicate)
+        {
+            foreach (string existingCustomAffix in customAffixesList)
+            {
+                if (existingCustomAffix.ToUpper() == normalizedAffix)
+                {
+                    isDuplicate = true;
+                    break;
+                }
+            }
+        }
+
+        if (isDuplicate)
+        {
+            Debug.LogWarning($"Affix '{normalizedAffix}' already exists. Cannot add duplicate.");
+            return;
+        }
+
+        // Add the new custom affix
+        customAffixesList.Add(normalizedAffix);
+        
+        // Save to PlayerPrefs
+        SaveCustomAffixes();
+        
+        // Recreate affix tiles to include the new one
+        CreateAffixTiles();
+        
+        Debug.Log($"Added new custom affix: '{normalizedAffix}'. Total custom affixes: {customAffixesList.Count}");
     }
     #endregion
 }
