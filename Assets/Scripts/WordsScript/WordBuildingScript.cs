@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.EventSystems;
 using System.Collections.Generic;
 
 public class WordBuildingScript : MonoBehaviour
@@ -33,11 +34,16 @@ public class WordBuildingScript : MonoBehaviour
     private string currentSuffix = "";
     private string currentMeaning = "";
     private List<string> affixesList;
+    private GameObject currentDraggedTile;
+    private Canvas canvas;
     #endregion
 
     private void Start()
     {
         WordBuildingDisplay.SetActive(false);
+        
+        // Get canvas reference for dragging
+        canvas = FindObjectOfType<Canvas>();
         
         // Initialize tiles - prefix and suffix start inactive
         if (prefixTile != null) prefixTile.SetActive(false);
@@ -52,6 +58,7 @@ public class WordBuildingScript : MonoBehaviour
         // Load affixes and create tiles
         LoadAffixes();
         CreateAffixTiles();
+        SetupDropZones();
         
         UpdateSubmitButtonState();
     }
@@ -202,8 +209,177 @@ public class WordBuildingScript : MonoBehaviour
                 affixText.text = affix;
             }
             
-            // TODO: Add click functionality to affix tiles for selecting prefix/suffix
+            // Add drag functionality to affix tile
+            AddDragFunctionality(affixTile, affix, false);
         }
+    }
+    
+    private void SetupDropZones()
+    {
+        // Add drag functionality to prefix and suffix tiles
+        if (prefixTile != null)
+        {
+            AddDragFunctionality(prefixTile, "", true);
+        }
+        if (suffixTile != null)
+        {
+            AddDragFunctionality(suffixTile, "", true);
+        }
+    }
+    
+    private void AddDragFunctionality(GameObject tile, string affixText, bool isDropZone)
+    {
+        // Add drag handler
+        DragHandler dragHandler = tile.GetComponent<DragHandler>();
+        if (dragHandler == null)
+        {
+            dragHandler = tile.AddComponent<DragHandler>();
+        }
+        dragHandler.Initialize(this, affixText, isDropZone);
+        
+        // Add drop zone functionality if it's a prefix/suffix tile
+        if (isDropZone)
+        {
+            DropZone dropZone = tile.GetComponent<DropZone>();
+            if (dropZone == null)
+            {
+                dropZone = tile.AddComponent<DropZone>();
+            }
+            dropZone.Initialize(this, tile == prefixTile);
+        }
+    }
+    
+    public void StartDrag(GameObject draggedTile, string affixText, Vector2 startPosition)
+    {
+        // Create a clone for dragging
+        currentDraggedTile = Instantiate(draggedTile, canvas.transform);
+        currentDraggedTile.name = "DraggedTile_" + affixText;
+        
+        // Store original size before any modifications
+        RectTransform originalRect = draggedTile.GetComponent<RectTransform>();
+        RectTransform cloneRect = currentDraggedTile.GetComponent<RectTransform>();
+        
+        if (originalRect != null && cloneRect != null)
+        {
+            // Preserve the original size
+            cloneRect.sizeDelta = originalRect.sizeDelta;
+            cloneRect.anchorMin = originalRect.anchorMin;
+            cloneRect.anchorMax = originalRect.anchorMax;
+            cloneRect.pivot = originalRect.pivot;
+        }
+        
+        // Remove any existing drag handlers from the clone to prevent conflicts
+        DragHandler[] dragHandlers = currentDraggedTile.GetComponents<DragHandler>();
+        for (int i = 0; i < dragHandlers.Length; i++)
+        {
+            DestroyImmediate(dragHandlers[i]);
+        }
+        
+        DropZone[] dropZones = currentDraggedTile.GetComponents<DropZone>();
+        for (int i = 0; i < dropZones.Length; i++)
+        {
+            DestroyImmediate(dropZones[i]);
+        }
+        
+        // Make it non-interactable while dragging
+        Button button = currentDraggedTile.GetComponent<Button>();
+        if (button != null) button.interactable = false;
+        
+        // Set the text
+        Text text = currentDraggedTile.GetComponentInChildren<Text>();
+        if (text != null) 
+        {
+            text.text = affixText;
+        }
+        
+        // Ensure the tile is active and visible
+        currentDraggedTile.SetActive(true);
+        
+        // Make it follow the mouse and ensure it's visible
+        currentDraggedTile.transform.SetAsLastSibling();
+        
+        // Position the cloned tile
+        if (cloneRect != null)
+        {
+            Vector3 worldPos;
+            if (RectTransformUtility.ScreenPointToWorldPointInRectangle(
+                canvas.transform as RectTransform, 
+                startPosition, 
+                canvas.worldCamera, 
+                out worldPos))
+            {
+                currentDraggedTile.transform.position = worldPos;
+            }
+            else
+            {
+                Vector2 localPos;
+                RectTransformUtility.ScreenPointToLocalPointInRectangle(
+                    canvas.transform as RectTransform, 
+                    startPosition, 
+                    canvas.worldCamera, 
+                    out localPos);
+                cloneRect.localPosition = localPos;
+            }
+        }
+        
+        // Make it slightly transparent to show it's being dragged
+        CanvasGroup canvasGroup = currentDraggedTile.GetComponent<CanvasGroup>();
+        if (canvasGroup == null)
+        {
+            canvasGroup = currentDraggedTile.AddComponent<CanvasGroup>();
+        }
+        canvasGroup.blocksRaycasts = false;
+    }
+    
+    public void UpdateDrag(Vector2 position)
+    {
+        if (currentDraggedTile != null)
+        {
+            RectTransform rectTransform = currentDraggedTile.GetComponent<RectTransform>();
+            if (rectTransform != null)
+            {
+                Vector2 localPos;
+                RectTransformUtility.ScreenPointToLocalPointInRectangle(
+                    canvas.transform as RectTransform, 
+                    position, 
+                    canvas.worldCamera, 
+                    out localPos);
+                rectTransform.localPosition = localPos;
+            }
+        }
+    }
+    
+    public void EndDrag(bool wasDropped, bool isPrefix = false, string droppedAffix = "")
+    {
+        if (currentDraggedTile != null)
+        {
+            if (wasDropped)
+            {
+                // Set the prefix or suffix
+                if (isPrefix)
+                {
+                    SetPrefix(droppedAffix);
+                }
+                else
+                {
+                    SetSuffix(droppedAffix);
+                }
+            }
+            
+            // Destroy the dragged tile
+            Destroy(currentDraggedTile);
+            currentDraggedTile = null;
+        }
+    }
+    
+    public void RemovePrefix()
+    {
+        SetPrefix("");
+    }
+    
+    public void RemoveSuffix()
+    {
+        SetSuffix("");
     }
     // ...existing code...
 }
