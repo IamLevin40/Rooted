@@ -30,9 +30,19 @@ public class PlayerScript : MonoBehaviour
     #region Root Word & Gameplay
     public string rootWord = "";
     public string playWord = "";
+    public bool isEnvironmentalWord = false;
+    public float queueDamage = 0f;
+    public int queueScore = 0;
     public GameplayScript gameplay;
     public WordBuildingScript wordBuilding;
     public bool onWordBuildingPhase = false;
+    #endregion
+
+    #region Projectile Fields
+    [Header("Projectile Settings")]
+    public GameObject projectilePrefab;
+    public EnemyScript enemy;
+    private GameObject currentProjectile = null;
     #endregion
 
     #region Unity Methods
@@ -150,10 +160,39 @@ public class PlayerScript : MonoBehaviour
         onWordBuildingPhase = false;
     }
 
-    public void UpdatePlayWord(string prefix, string root, string suffix)
+    public void SpawnPlayerProjectile(float damage, int score)
     {
-        playWord = prefix + root + suffix;
-        Debug.Log(playWord);
+        if (projectilePrefab == null || enemy == null) return;
+
+        // Spawn projectile on left or right side of player
+        bool right = Random.value > 0.5f;
+        float minOffset = 1.5f, maxOffset = 2.5f;
+        float xOffset = (right ? 1 : -1) * Random.Range(minOffset, maxOffset);
+        float yOffset = Random.Range(0f, 0.75f);
+        Vector3 spawnPos = transform.position + new Vector3(xOffset, yOffset, 0);
+        
+        GameObject proj = Instantiate(projectilePrefab, spawnPos, Quaternion.identity, this.transform);
+        currentProjectile = proj;
+        
+        PlayerProjectile pp = proj.GetComponent<PlayerProjectile>();
+        if (pp != null)
+        {
+            pp.moveRight = right;
+            pp.player = this;
+            pp.enemy = enemy;
+            pp.spawnOrigin = spawnPos;
+            pp.projectileWord = playWord;
+            pp.damage = damage;
+            pp.score = score;
+        }
+    }
+
+    public void OnProjectileDestroyed(GameObject proj)
+    {
+        if (currentProjectile == proj)
+        {
+            currentProjectile = null;
+        }
     }
     #endregion
 }

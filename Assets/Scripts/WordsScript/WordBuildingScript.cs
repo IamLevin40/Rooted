@@ -8,6 +8,7 @@ public class WordBuildingScript : MonoBehaviour
     #region UI References
     public GameObject WordBuildingDisplay;
     public PlayerScript player;
+    public EnemyScript enemy;
 
     [Header("Tiles")]
     public GameObject rootWordTile;
@@ -89,18 +90,6 @@ public class WordBuildingScript : MonoBehaviour
         Debug.Log($"Word building started with root word: {rootWord}");
     }
 
-    public void OnEndWordBuilding()
-    {
-        if (WordBuildingDisplay != null)
-        {
-            WordBuildingDisplay.SetActive(false);
-        }
-        if (player != null)
-        {
-            player.EndWordBuilding();
-        }
-    }
-
     private void UpdateWordDisplay()
     {
         // Update prefix display
@@ -134,18 +123,31 @@ public class WordBuildingScript : MonoBehaviour
 
     public void OnWordSubmit()
     {
-        // Combine prefix + root + suffix
         string combinedWord = currentPrefix + currentRootWord + currentSuffix;
 
-        // For testing purposes, print the combined word
-        Debug.Log($"Word submitted: {combinedWord} (Prefix: '{currentPrefix}', Root: '{currentRootWord}', Suffix: '{currentSuffix}')");
+        // Check if the word is valid first
+        bool isValidWord = WordScoringScript.IsValidWord(combinedWord);
 
-        // TODO: Add logic for word validation and scoring
+        if (isValidWord)
+        {
+            if (WordBuildingDisplay != null) WordBuildingDisplay.SetActive(false);
 
-        // End word building phase
+            // Use the queue values instead of recalculating
+            float finalDamage = player.queueDamage;
+            int finalScore = player.queueScore;
+
+            // Spawn projectile instead of immediately applying damage/score
+            if (player != null) player.SpawnPlayerProjectile(finalDamage, finalScore);
+        }
+        else
+        {
+            Debug.Log($"Invalid word: {combinedWord} - No projectile spawned");
+            return;
+        }
+
+        // Reset tiles (but don't end word building yet for valid words - projectile will handle that)
         if (prefixTile != null) SetTileComponentsEnabled(prefixTile, false);
         if (suffixTile != null) SetTileComponentsEnabled(suffixTile, false);
-        OnEndWordBuilding();
     }
 
     public void SetPrefix(string prefix)
@@ -184,7 +186,34 @@ public class WordBuildingScript : MonoBehaviour
     {
         if (player != null)
         {
-            player.UpdatePlayWord(currentPrefix, currentRootWord, currentSuffix);
+            string playWord = currentPrefix + currentRootWord + currentSuffix;
+            player.playWord = playWord;
+            Debug.Log($"Player word updated: {playWord}");
+            CalculateAndUpdateQueueValues(playWord);
+            Debug.Log($"Queue Damage: {player.queueDamage}, Queue Score: {player.queueScore} for word: {playWord}; Environmental: {player.isEnvironmentalWord}");
+        }
+    }
+
+    private void CalculateAndUpdateQueueValues(string playWord)
+    {
+        // Check if the word is valid first
+        bool isValidWord = WordScoringScript.IsValidWord(playWord);
+
+        if (isValidWord)
+        {
+            bool isEnvironmentalWord = WordScoringScript.IsEnvironmentalWord(playWord);
+
+            // Calculate base damage and score
+            int baseDamage = WordScoringScript.CalculateDamage(playWord);
+            int baseScore = WordScoringScript.CalculateWordScore(playWord);
+
+            // Apply multiplier for environmental words
+            int finalDamage = isEnvironmentalWord ? baseDamage * 2 : baseDamage;
+            int finalScore = isEnvironmentalWord ? baseScore * 2 : baseScore;
+
+            player.queueDamage = finalDamage;
+            player.queueScore = finalScore;
+            player.isEnvironmentalWord = isEnvironmentalWord;
         }
     }
 
