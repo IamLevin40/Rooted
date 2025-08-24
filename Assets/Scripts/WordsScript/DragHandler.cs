@@ -24,8 +24,7 @@ public class DragHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
         
         if (isDropZone)
         {
-            // If dragging from prefix/suffix tile, get the current text
-            Text text = GetComponentInChildren<Text>();
+            var text = GetComponentInChildren<Text>();
             if (text != null && !string.IsNullOrEmpty(text.text))
             {
                 affixText = text.text;
@@ -34,7 +33,6 @@ public class DragHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
         }
         else
         {
-            // Dragging from affix tile
             wordBuilding.StartDrag(gameObject, affixText, eventData.position);
         }
     }
@@ -52,17 +50,15 @@ public class DragHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
         
         isDragging = false;
         
-        // Check if dropped on a valid drop zone
         bool wasDropped = false;
         bool isPrefix = false;
         
-        // Raycast to see what we're over
         var results = new System.Collections.Generic.List<RaycastResult>();
         EventSystem.current.RaycastAll(eventData, results);
         
         foreach (var result in results)
         {
-            DropZone dropZone = result.gameObject.GetComponent<DropZone>();
+            var dropZone = result.gameObject.GetComponent<DropZone>();
             if (dropZone != null)
             {
                 wasDropped = true;
@@ -71,18 +67,9 @@ public class DragHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
             }
         }
         
-        // If dragging from a drop zone and not dropped on another drop zone, remove it
         if (isDropZone && !wasDropped)
         {
-            // Remove from current position
-            if (gameObject.name.Contains("prefix") || transform.parent.name.Contains("prefix"))
-            {
-                wordBuilding.RemovePrefix();
-            }
-            else if (gameObject.name.Contains("suffix") || transform.parent.name.Contains("suffix"))
-            {
-                wordBuilding.RemoveSuffix();
-            }
+            wordBuilding.RemoveAffix(gameObject);
         }
         
         wordBuilding.EndDrag(wasDropped, isPrefix, affixText);

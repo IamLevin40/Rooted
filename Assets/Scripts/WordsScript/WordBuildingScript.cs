@@ -8,26 +8,26 @@ public class WordBuildingScript : MonoBehaviour
     #region UI References
     public GameObject WordBuildingDisplay;
     public PlayerScript player;
-    
+
     [Header("Tiles")]
     public GameObject rootWordTile;
     public GameObject prefixTile;
     public GameObject suffixTile;
-    
+
     [Header("Text Components")]
     public Text rootWordText;
     public Text prefixText;
     public Text suffixText;
     public Text meaningText;
-    
+
     [Header("Submit Button")]
     public Button wordSubmitButton;
-    
+
     [Header("Affix Tiles")]
     public GameObject affixContent;
     public GameObject affixTilePrefab;
     #endregion
-    
+
     #region Word Data
     private string currentRootWord = "";
     private string currentPrefix = "";
@@ -40,26 +40,25 @@ public class WordBuildingScript : MonoBehaviour
 
     private void Start()
     {
+        // Initialize tiles - prefix and suffix start with components disabled
+        if (prefixTile != null) SetTileComponentsEnabled(prefixTile, false);
+        if (suffixTile != null) SetTileComponentsEnabled(suffixTile, false);
         WordBuildingDisplay.SetActive(false);
-        
+
         // Get canvas reference for dragging
         canvas = FindObjectOfType<Canvas>();
-        
-        // Initialize tiles - prefix and suffix start inactive
-        if (prefixTile != null) prefixTile.SetActive(false);
-        if (suffixTile != null) suffixTile.SetActive(false);
-        
+
         // Setup submit button
         if (wordSubmitButton != null)
         {
             wordSubmitButton.onClick.AddListener(OnWordSubmit);
         }
-        
+
         // Load affixes and create tiles
         LoadAffixes();
         CreateAffixTiles();
         SetupDropZones();
-        
+
         UpdateSubmitButtonState();
     }
 
@@ -76,16 +75,16 @@ public class WordBuildingScript : MonoBehaviour
         {
             rootWordText.text = currentRootWord;
         }
-        
+
         // Clear prefix and suffix
         currentPrefix = "";
         currentSuffix = "";
         currentMeaning = "";
-        
+
         // Update UI
         UpdateWordDisplay();
         UpdateSubmitButtonState();
-        
+
         Debug.Log($"Word building started with root word: {rootWord}");
     }
 
@@ -100,7 +99,7 @@ public class WordBuildingScript : MonoBehaviour
             player.EndWordBuilding();
         }
     }
-    
+
     private void UpdateWordDisplay()
     {
         // Update prefix display
@@ -108,20 +107,20 @@ public class WordBuildingScript : MonoBehaviour
         {
             prefixText.text = currentPrefix;
         }
-        
+
         // Update suffix display
         if (suffixText != null)
         {
             suffixText.text = currentSuffix;
         }
-        
+
         // Update meaning display
         if (meaningText != null)
         {
             meaningText.text = currentMeaning;
         }
     }
-    
+
     private void UpdateSubmitButtonState()
     {
         if (wordSubmitButton != null)
@@ -131,48 +130,87 @@ public class WordBuildingScript : MonoBehaviour
             wordSubmitButton.interactable = canSubmit;
         }
     }
-    
+
     public void OnWordSubmit()
     {
         // Combine prefix + root + suffix
         string combinedWord = currentPrefix + currentRootWord + currentSuffix;
-        
+
         // For testing purposes, print the combined word
         Debug.Log($"Word submitted: {combinedWord} (Prefix: '{currentPrefix}', Root: '{currentRootWord}', Suffix: '{currentSuffix}')");
-        
+
         // TODO: Add logic for word validation and scoring
-        
+
         // End word building phase
+        if (prefixTile != null) SetTileComponentsEnabled(prefixTile, false);
+        if (suffixTile != null) SetTileComponentsEnabled(suffixTile, false);
         OnEndWordBuilding();
     }
-    
-    // Helper methods for adding prefix/suffix (to be called by UI or other systems)
+
     public void SetPrefix(string prefix)
     {
-        currentPrefix = prefix;
-        if (prefixTile != null) prefixTile.SetActive(!string.IsNullOrEmpty(prefix));
-        UpdateWordDisplay();
+        currentPrefix = prefix ?? "";
+        UpdateAffixDisplay(prefixTile, prefixText, currentPrefix);
         UpdateSubmitButtonState();
     }
-    
+
     public void SetSuffix(string suffix)
     {
-        currentSuffix = suffix;
-        if (suffixTile != null) suffixTile.SetActive(!string.IsNullOrEmpty(suffix));
-        UpdateWordDisplay();
+        currentSuffix = suffix ?? "";
+        UpdateAffixDisplay(suffixTile, suffixText, currentSuffix);
         UpdateSubmitButtonState();
     }
-    
+
+    private void UpdateAffixDisplay(GameObject tile, Text displayText, string affixValue)
+    {
+        bool hasAffix = !string.IsNullOrEmpty(affixValue);
+        
+        if (displayText != null)
+            displayText.text = affixValue;
+            
+        if (tile != null)
+        {
+            SetTileComponentsEnabled(tile, hasAffix);
+            var tileText = tile.GetComponentInChildren<Text>(true);
+            if (tileText != null)
+                tileText.text = affixValue;
+        }
+    }
+
+    private void SetTileComponentsEnabled(GameObject tile, bool enabled)
+    {
+        if (tile == null) return;
+        var image = tile.GetComponent<Image>();
+        if (image != null)
+        {
+            Color c = image.color;
+            c.a = enabled ? 1f : 0f;
+            image.color = c;
+        }
+        var button = tile.GetComponent<Button>();
+        if (button != null)
+        {
+            button.interactable = enabled;
+        }
+        var text = tile.GetComponentInChildren<Text>(true);
+        if (text != null)
+        {
+            Color c = text.color;
+            c.a = enabled ? 1f : 0f;
+            text.color = c;
+        }
+    }
+
     public void SetMeaning(string meaning)
     {
         currentMeaning = meaning;
         UpdateWordDisplay();
     }
-    
+
     private void LoadAffixes()
     {
         affixesList = new List<string>();
-        
+
         // Load from Resources/ExternalFiles/affixes_list.txt
         TextAsset txt = Resources.Load<TextAsset>("ExternalFiles/affixes_list");
         if (txt != null)
@@ -192,28 +230,28 @@ public class WordBuildingScript : MonoBehaviour
             Debug.LogWarning("Could not load affixes_list.txt from Resources/ExternalFiles/");
         }
     }
-    
+
     private void CreateAffixTiles()
     {
         if (affixContent == null || affixTilePrefab == null || affixesList == null) return;
-        
+
         foreach (string affix in affixesList)
         {
             // Instantiate the affix tile prefab
             GameObject affixTile = Instantiate(affixTilePrefab, affixContent.transform);
-            
+
             // Get the text component from the child
             Text affixText = affixTile.GetComponentInChildren<Text>();
             if (affixText != null)
             {
                 affixText.text = affix;
             }
-            
+
             // Add drag functionality to affix tile
             AddDragFunctionality(affixTile, affix, false);
         }
     }
-    
+
     private void SetupDropZones()
     {
         // Add drag functionality to prefix and suffix tiles
@@ -226,7 +264,7 @@ public class WordBuildingScript : MonoBehaviour
             AddDragFunctionality(suffixTile, "", true);
         }
     }
-    
+
     private void AddDragFunctionality(GameObject tile, string affixText, bool isDropZone)
     {
         // Add drag handler
@@ -236,7 +274,7 @@ public class WordBuildingScript : MonoBehaviour
             dragHandler = tile.AddComponent<DragHandler>();
         }
         dragHandler.Initialize(this, affixText, isDropZone);
-        
+
         // Add drop zone functionality if it's a prefix/suffix tile
         if (isDropZone)
         {
@@ -248,89 +286,104 @@ public class WordBuildingScript : MonoBehaviour
             dropZone.Initialize(this, tile == prefixTile);
         }
     }
-    
+
     public void StartDrag(GameObject draggedTile, string affixText, Vector2 startPosition)
     {
-        // Create a clone for dragging
-        currentDraggedTile = Instantiate(draggedTile, canvas.transform);
+        HideOriginalTileIfNeeded(draggedTile);
+        CreateDraggedTileClone(draggedTile, affixText, startPosition);
+    }
+
+    private void HideOriginalTileIfNeeded(GameObject draggedTile)
+    {
+        if (draggedTile == prefixTile || draggedTile == suffixTile)
+        {
+            SetTileComponentsEnabled(draggedTile, false);
+        }
+    }
+
+    private void CreateDraggedTileClone(GameObject originalTile, string affixText, Vector2 startPosition)
+    {
+        currentDraggedTile = Instantiate(originalTile, canvas.transform);
         currentDraggedTile.name = "DraggedTile_" + affixText;
-        
-        // Store original size before any modifications
-        RectTransform originalRect = draggedTile.GetComponent<RectTransform>();
+
+        SetupDraggedTileTransform(originalTile, startPosition);
+        CleanupDraggedTileComponents();
+        ConfigureDraggedTileAppearance(affixText);
+        SetupDraggedTileVisibility();
+    }
+
+    private void SetupDraggedTileTransform(GameObject originalTile, Vector2 startPosition)
+    {
+        RectTransform originalRect = originalTile.GetComponent<RectTransform>();
         RectTransform cloneRect = currentDraggedTile.GetComponent<RectTransform>();
-        
+
         if (originalRect != null && cloneRect != null)
         {
-            // Preserve the original size
             cloneRect.sizeDelta = originalRect.sizeDelta;
             cloneRect.anchorMin = originalRect.anchorMin;
             cloneRect.anchorMax = originalRect.anchorMax;
             cloneRect.pivot = originalRect.pivot;
+
+            PositionDraggedTile(cloneRect, startPosition);
         }
-        
-        // Remove any existing drag handlers from the clone to prevent conflicts
-        DragHandler[] dragHandlers = currentDraggedTile.GetComponents<DragHandler>();
-        for (int i = 0; i < dragHandlers.Length; i++)
+    }
+
+    private void PositionDraggedTile(RectTransform cloneRect, Vector2 startPosition)
+    {
+        Vector3 worldPos;
+        if (RectTransformUtility.ScreenPointToWorldPointInRectangle(
+            canvas.transform as RectTransform,
+            startPosition,
+            canvas.worldCamera,
+            out worldPos))
         {
-            DestroyImmediate(dragHandlers[i]);
+            currentDraggedTile.transform.position = worldPos;
         }
-        
-        DropZone[] dropZones = currentDraggedTile.GetComponents<DropZone>();
-        for (int i = 0; i < dropZones.Length; i++)
+        else
         {
-            DestroyImmediate(dropZones[i]);
+            Vector2 localPos;
+            RectTransformUtility.ScreenPointToLocalPointInRectangle(
+                canvas.transform as RectTransform,
+                startPosition,
+                canvas.worldCamera,
+                out localPos);
+            cloneRect.localPosition = localPos;
         }
-        
-        // Make it non-interactable while dragging
-        Button button = currentDraggedTile.GetComponent<Button>();
+    }
+
+    private void CleanupDraggedTileComponents()
+    {
+        var dragHandlers = currentDraggedTile.GetComponents<DragHandler>();
+        var dropZones = currentDraggedTile.GetComponents<DropZone>();
+
+        foreach (var handler in dragHandlers)
+            DestroyImmediate(handler);
+        foreach (var zone in dropZones)
+            DestroyImmediate(zone);
+    }
+
+    private void ConfigureDraggedTileAppearance(string affixText)
+    {
+        var button = currentDraggedTile.GetComponent<Button>();
         if (button != null) button.interactable = false;
-        
-        // Set the text
-        Text text = currentDraggedTile.GetComponentInChildren<Text>();
-        if (text != null) 
-        {
-            text.text = affixText;
-        }
-        
-        // Ensure the tile is active and visible
+
+        var text = currentDraggedTile.GetComponentInChildren<Text>();
+        if (text != null) text.text = affixText;
+
         currentDraggedTile.SetActive(true);
-        
-        // Make it follow the mouse and ensure it's visible
+        SetTileComponentsEnabled(currentDraggedTile, true);
+    }
+
+    private void SetupDraggedTileVisibility()
+    {
         currentDraggedTile.transform.SetAsLastSibling();
-        
-        // Position the cloned tile
-        if (cloneRect != null)
-        {
-            Vector3 worldPos;
-            if (RectTransformUtility.ScreenPointToWorldPointInRectangle(
-                canvas.transform as RectTransform, 
-                startPosition, 
-                canvas.worldCamera, 
-                out worldPos))
-            {
-                currentDraggedTile.transform.position = worldPos;
-            }
-            else
-            {
-                Vector2 localPos;
-                RectTransformUtility.ScreenPointToLocalPointInRectangle(
-                    canvas.transform as RectTransform, 
-                    startPosition, 
-                    canvas.worldCamera, 
-                    out localPos);
-                cloneRect.localPosition = localPos;
-            }
-        }
-        
-        // Make it slightly transparent to show it's being dragged
-        CanvasGroup canvasGroup = currentDraggedTile.GetComponent<CanvasGroup>();
+
+        var canvasGroup = currentDraggedTile.GetComponent<CanvasGroup>();
         if (canvasGroup == null)
-        {
             canvasGroup = currentDraggedTile.AddComponent<CanvasGroup>();
-        }
         canvasGroup.blocksRaycasts = false;
     }
-    
+
     public void UpdateDrag(Vector2 position)
     {
         if (currentDraggedTile != null)
@@ -340,46 +393,37 @@ public class WordBuildingScript : MonoBehaviour
             {
                 Vector2 localPos;
                 RectTransformUtility.ScreenPointToLocalPointInRectangle(
-                    canvas.transform as RectTransform, 
-                    position, 
-                    canvas.worldCamera, 
+                    canvas.transform as RectTransform,
+                    position,
+                    canvas.worldCamera,
                     out localPos);
                 rectTransform.localPosition = localPos;
             }
         }
     }
-    
+
     public void EndDrag(bool wasDropped, bool isPrefix = false, string droppedAffix = "")
     {
         if (currentDraggedTile != null)
         {
             if (wasDropped)
             {
-                // Set the prefix or suffix
                 if (isPrefix)
-                {
                     SetPrefix(droppedAffix);
-                }
                 else
-                {
                     SetSuffix(droppedAffix);
-                }
             }
-            
-            // Destroy the dragged tile
+
             Destroy(currentDraggedTile);
             currentDraggedTile = null;
         }
     }
-    
-    public void RemovePrefix()
+
+    public void RemoveAffix(GameObject affixTile)
     {
-        SetPrefix("");
+        if (affixTile == prefixTile)
+            SetPrefix("");
+        else if (affixTile == suffixTile)
+            SetSuffix("");
     }
-    
-    public void RemoveSuffix()
-    {
-        SetSuffix("");
-    }
-    // ...existing code...
 }
