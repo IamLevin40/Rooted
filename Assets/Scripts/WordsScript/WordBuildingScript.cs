@@ -33,6 +33,14 @@ public class WordBuildingScript : MonoBehaviour
     [Header("Affix Tiles")]
     public GameObject affixContent;
     public GameObject affixTilePrefab;
+    public AffixHandlingScript affixHandler;
+
+    [Header("Panel Management")]
+    public GameObject yourTiles;
+    public GameObject createCustomTiles;
+    public Button createCustomTileButton;
+    public Button backButton;
+    public CustomTileCreatingScript customTileCreating;
     #endregion
 
     #region Word Data
@@ -40,7 +48,6 @@ public class WordBuildingScript : MonoBehaviour
     private string currentPrefix = "";
     private string currentSuffix = "";
     private string currentDefinition = "";
-    private List<string> affixesList;
     private GameObject currentDraggedTile;
     private Canvas canvas;
     private float currentTime;
@@ -63,8 +70,21 @@ public class WordBuildingScript : MonoBehaviour
             wordSubmitButton.onClick.AddListener(OnWordSubmit);
         }
 
-        // Load affixes and create tiles
-        LoadAffixes();
+        // Setup panel management buttons
+        if (createCustomTileButton != null)
+        {
+            createCustomTileButton.onClick.AddListener(OnCreateCustomTileClicked);
+        }
+
+        if (backButton != null)
+        {
+            backButton.onClick.AddListener(OnBackButtonClicked);
+        }
+
+        // Set default panel states
+        SetPanelStates(true); // Show yourTiles by default
+
+        // Create affix tiles
         CreateAffixTiles();
         SetupDropZones();
 
@@ -290,49 +310,49 @@ public class WordBuildingScript : MonoBehaviour
         UpdateWordDisplay();
     }
 
-    private void LoadAffixes()
+    public void CreateAffixTiles()
     {
-        affixesList = new List<string>();
+        if (affixContent == null || affixTilePrefab == null || affixHandler == null) return;
 
-        // Load from Resources/ExternalFiles/affixes_list.txt
-        TextAsset txt = Resources.Load<TextAsset>("ExternalFiles/affixes_list");
-        if (txt != null)
+        // Clear existing tiles first
+        ClearAffixTiles();
+
+        // Get all affixes from the handler
+        List<string> allAffixes = affixHandler.GetAllAffixes();
+
+        // Create tiles for all affixes
+        foreach (string affix in allAffixes)
         {
-            using (System.IO.StringReader reader = new System.IO.StringReader(txt.text))
-            {
-                string line;
-                while ((line = reader.ReadLine()) != null)
-                {
-                    if (!string.IsNullOrWhiteSpace(line))
-                        affixesList.Add(line.Trim());
-                }
-            }
+            CreateSingleAffixTile(affix);
         }
-        else
+
+        Debug.Log($"Created {allAffixes.Count} affix tiles. {affixHandler.GetAffixStatistics()}");
+    }
+
+    private void ClearAffixTiles()
+    {
+        // Clear all existing affix tiles
+        for (int i = affixContent.transform.childCount - 1; i >= 0; i--)
         {
-            Debug.LogWarning("Could not load affixes_list.txt from Resources/ExternalFiles/");
+            Transform child = affixContent.transform.GetChild(i);
+            DestroyImmediate(child.gameObject);
         }
     }
 
-    private void CreateAffixTiles()
+    private void CreateSingleAffixTile(string affix)
     {
-        if (affixContent == null || affixTilePrefab == null || affixesList == null) return;
+        // Instantiate the affix tile prefab
+        GameObject affixTile = Instantiate(affixTilePrefab, affixContent.transform);
 
-        foreach (string affix in affixesList)
+        // Get the text component from the child
+        Text affixText = affixTile.GetComponentInChildren<Text>();
+        if (affixText != null)
         {
-            // Instantiate the affix tile prefab
-            GameObject affixTile = Instantiate(affixTilePrefab, affixContent.transform);
-
-            // Get the text component from the child
-            Text affixText = affixTile.GetComponentInChildren<Text>();
-            if (affixText != null)
-            {
-                affixText.text = affix;
-            }
-
-            // Add drag functionality to affix tile
-            AddDragFunctionality(affixTile, affix, false);
+            affixText.text = affix;
         }
+
+        // Add drag functionality to affix tile
+        AddDragFunctionality(affixTile, affix, false);
     }
 
     private void SetupDropZones()
@@ -485,16 +505,34 @@ public class WordBuildingScript : MonoBehaviour
         }
     }
 
-    public void EndDrag(bool wasDropped, bool isPrefix = false, string droppedAffix = "")
+    public void EndDrag(bool wasDropped, bool isPrefix = false, string droppedAffix = "", bool wasFromDropZone = false, bool wasOriginallyPrefix = false)
     {
         if (currentDraggedTile != null)
         {
             if (wasDropped)
             {
+                // Set the new position
                 if (isPrefix)
                     SetPrefix(droppedAffix);
                 else
                     SetSuffix(droppedAffix);
+                
+                // If dragging from one drop zone to another, clear the original position
+                if (wasFromDropZone)
+                {
+                    // If moved to different zone, clear the original
+                    if (wasOriginallyPrefix && !isPrefix)
+                    {
+                        // Moved from prefix to suffix, clear prefix
+                        SetPrefix("");
+                    }
+                    else if (!wasOriginallyPrefix && isPrefix)
+                    {
+                        // Moved from suffix to prefix, clear suffix
+                        SetSuffix("");
+                    }
+                    // If moved to same zone (wasOriginallyPrefix == isPrefix), don't clear anything
+                }
             }
 
             Destroy(currentDraggedTile);
@@ -570,6 +608,34 @@ public class WordBuildingScript : MonoBehaviour
         {
             player.EndWordBuilding();
         }
+    }
+    #endregion
+
+    #region Panel Management
+    private void SetPanelStates(bool showYourTiles)
+    {
+        if (yourTiles != null)
+            yourTiles.SetActive(showYourTiles);
+        
+        if (createCustomTiles != null)
+            createCustomTiles.SetActive(!showYourTiles);
+    }
+
+    private void OnCreateCustomTileClicked()
+    {
+        SetPanelStates(false); // Hide yourTiles, show createCustomTiles
+        
+        // Initialize custom tile creation
+        if (customTileCreating != null)
+        {
+            customTileCreating.InitializeCustomTileCreation();
+        }
+    }
+
+    public void OnBackButtonClicked()
+    {
+        SetPanelStates(true); // Show yourTiles, hide createCustomTiles
+        CreateAffixTiles();
     }
     #endregion
 }
