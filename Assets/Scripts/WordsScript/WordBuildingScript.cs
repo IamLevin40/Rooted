@@ -84,6 +84,7 @@ public class WordBuildingScript : MonoBehaviour
         // Update UI
         UpdateWordDisplay();
         UpdateSubmitButtonState();
+        UpdatePlayerWord();
 
         Debug.Log($"Word building started with root word: {rootWord}");
     }
@@ -174,6 +175,16 @@ public class WordBuildingScript : MonoBehaviour
             var tileText = tile.GetComponentInChildren<Text>(true);
             if (tileText != null)
                 tileText.text = affixValue;
+        }
+
+        UpdatePlayerWord();
+    }
+
+    private void UpdatePlayerWord()
+    {
+        if (player != null)
+        {
+            player.UpdatePlayWord(currentPrefix, currentRootWord, currentSuffix);
         }
     }
 

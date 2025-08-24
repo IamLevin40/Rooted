@@ -29,6 +29,7 @@ public class PlayerScript : MonoBehaviour
 
     #region Root Word & Gameplay
     public string rootWord = "";
+    public string playWord = "";
     public GameplayScript gameplay;
     public WordBuildingScript wordBuilding;
     public bool onWordBuildingPhase = false;
@@ -147,6 +148,12 @@ public class PlayerScript : MonoBehaviour
     public void EndWordBuilding()
     {
         onWordBuildingPhase = false;
+    }
+
+    public void UpdatePlayWord(string prefix, string root, string suffix)
+    {
+        playWord = prefix + root + suffix;
+        Debug.Log(playWord);
     }
     #endregion
 }
