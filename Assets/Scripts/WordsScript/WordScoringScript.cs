@@ -11,38 +11,21 @@ public class WordScoringScript : MonoBehaviour
         {'V', 4}, {'W', 4}, {'X', 8}, {'Y', 4}, {'Z', 10}
     };
 
-    public static int CalculateWordScore(string word)
+    public static int CalculateWordScore(string word) => CalculateLetterScore(word);
+    
+    public static int CalculateDamageToEnemy(string word) => string.IsNullOrEmpty(word) ? 0 : word.Length;
+    
+    public static int CalculateDamageToPlayer(string word) => CalculateLetterScore(word);
+
+    private static int CalculateLetterScore(string word)
     {
         if (string.IsNullOrEmpty(word)) return 0;
         
         int totalScore = 0;
         foreach (char letter in word.ToUpper())
         {
-            if (letterScores.ContainsKey(letter))
-            {
-                totalScore += letterScores[letter];
-            }
-        }
-        return totalScore;
-    }
-
-    public static int CalculateDamageToEnemy(string word)
-    {
-        if (string.IsNullOrEmpty(word)) return 0;
-        return word.Length;
-    }
-
-    public static int CalculateDamageToPlayer(string word)
-    {
-        if (string.IsNullOrEmpty(word)) return 0;
-        
-        int totalScore = 0;
-        foreach (char letter in word.ToUpper())
-        {
-            if (letterScores.ContainsKey(letter))
-            {
-                totalScore += letterScores[letter];
-            }
+            if (letterScores.TryGetValue(letter, out int score))
+                totalScore += score;
         }
         return totalScore;
     }

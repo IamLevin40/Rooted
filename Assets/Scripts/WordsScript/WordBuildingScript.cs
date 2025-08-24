@@ -56,38 +56,31 @@ public class WordBuildingScript : MonoBehaviour
 
     private void Start()
     {
-        // Initialize tiles - prefix and suffix start with components disabled
-        if (prefixTile != null) SetTileComponentsEnabled(prefixTile, false);
-        if (suffixTile != null) SetTileComponentsEnabled(suffixTile, false);
+        InitializeComponents();
+        SetupUIListeners();
+        InitializeGameState();
+    }
+
+    private void InitializeComponents()
+    {
+        canvas = FindFirstObjectByType<Canvas>();
+        SetTileComponentsEnabled(prefixTile, false);
+        SetTileComponentsEnabled(suffixTile, false);
         WordBuildingDisplay.SetActive(false);
+    }
 
-        // Get canvas reference for dragging
-        canvas = FindObjectOfType<Canvas>();
+    private void SetupUIListeners()
+    {
+        wordSubmitButton?.onClick.AddListener(OnWordSubmit);
+        createCustomTileButton?.onClick.AddListener(OnCreateCustomTileClicked);
+        backButton?.onClick.AddListener(OnBackButtonClicked);
+    }
 
-        // Setup submit button
-        if (wordSubmitButton != null)
-        {
-            wordSubmitButton.onClick.AddListener(OnWordSubmit);
-        }
-
-        // Setup panel management buttons
-        if (createCustomTileButton != null)
-        {
-            createCustomTileButton.onClick.AddListener(OnCreateCustomTileClicked);
-        }
-
-        if (backButton != null)
-        {
-            backButton.onClick.AddListener(OnBackButtonClicked);
-        }
-
-        // Set default panel states
-        SetPanelStates(true); // Show yourTiles by default
-
-        // Create affix tiles
+    private void InitializeGameState()
+    {
+        SetPanelStates(true);
         CreateAffixTiles();
         SetupDropZones();
-
         UpdateSubmitButtonState();
     }
 
@@ -107,60 +100,38 @@ public class WordBuildingScript : MonoBehaviour
 
     public void OnStartWordBuilding(string rootWord)
     {
-        if (WordBuildingDisplay != null)
-        {
-            WordBuildingDisplay.SetActive(true);
-        }
+        WordBuildingDisplay?.SetActive(true);
+        ResetWordState(rootWord);
+        UpdateAllDisplays();
+        StartTimer();
+        Debug.Log($"Word building started with root word: {rootWord}");
+    }
 
-        // Set the root word
+    private void ResetWordState(string rootWord)
+    {
         currentRootWord = rootWord;
-        if (rootWordText != null)
-        {
-            rootWordText.text = currentRootWord;
-        }
+        currentPrefix = currentSuffix = currentDefinition = "";
+        if (rootWordText != null) rootWordText.text = currentRootWord;
+    }
 
-        // Clear prefix and suffix
-        currentPrefix = "";
-        currentSuffix = "";
-        currentDefinition = "";
-
-        // Update UI
+    private void UpdateAllDisplays()
+    {
         UpdateWordDisplay();
         UpdateSubmitButtonState();
         UpdatePlayerWord();
-
-        // Start timer
-        StartTimer();
-
-        Debug.Log($"Word building started with root word: {rootWord}");
     }
 
     private void UpdateWordDisplay()
     {
-        // Update prefix display
-        if (prefixText != null)
-        {
-            prefixText.text = currentPrefix;
-        }
-
-        // Update suffix display
-        if (suffixText != null)
-        {
-            suffixText.text = currentSuffix;
-        }
-
-        // Update definition display
-        if (definitionText != null)
-        {
-            definitionText.text = currentDefinition;
-        }
+        if (prefixText != null) prefixText.text = currentPrefix;
+        if (suffixText != null) suffixText.text = currentSuffix;
+        if (definitionText != null) definitionText.text = currentDefinition;
     }
 
     private void UpdateSubmitButtonState()
     {
         if (wordSubmitButton != null)
         {
-            // Can only submit if we have prefix and/or suffix (not just root word alone)
             bool canSubmit = !string.IsNullOrEmpty(currentPrefix) || !string.IsNullOrEmpty(currentSuffix);
             wordSubmitButton.interactable = canSubmit;
         }
@@ -169,20 +140,11 @@ public class WordBuildingScript : MonoBehaviour
     public void OnWordSubmit()
     {
         string combinedWord = currentPrefix + currentRootWord + currentSuffix;
-
-        // Check if the word is valid first
         bool isValidWord = validWordDetector.IsValidWord(combinedWord);
 
         if (isValidWord)
         {
-            if (WordBuildingDisplay != null) WordBuildingDisplay.SetActive(false);
-
-            // Use the queue values instead of recalculating
-            float finalDamage = player.queueDamage;
-            int finalScore = player.queueScore;
-
-            // Spawn projectile instead of immediately applying damage/score
-            if (player != null) player.SpawnPlayerProjectile(finalDamage, finalScore);
+            ProcessValidWord();
         }
         else
         {
@@ -190,25 +152,30 @@ public class WordBuildingScript : MonoBehaviour
             return;
         }
 
-        // Stop the timer
+        ResetAfterSubmission();
+    }
+
+    private void ProcessValidWord()
+    {
+        WordBuildingDisplay?.SetActive(false);
+        if (player != null) 
+            player.SpawnPlayerProjectile(player.queueDamage, player.queueScore);
+    }
+
+    private void ResetAfterSubmission()
+    {
         StopTimer();
-
-        // Reset tiles (but don't end word building yet for valid words - projectile will handle that)
-        if (prefixTile != null) SetTileComponentsEnabled(prefixTile, false);
-        if (suffixTile != null) SetTileComponentsEnabled(suffixTile, false);
+        SetTileComponentsEnabled(prefixTile, false);
+        SetTileComponentsEnabled(suffixTile, false);
     }
 
-    public void SetPrefix(string prefix)
-    {
-        currentPrefix = prefix ?? "";
-        UpdateAffixDisplay(prefixTile, prefixText, currentPrefix);
-        UpdateSubmitButtonState();
-    }
+    public void SetPrefix(string prefix) => SetAffix(ref currentPrefix, prefix, prefixTile, prefixText);
+    public void SetSuffix(string suffix) => SetAffix(ref currentSuffix, suffix, suffixTile, suffixText);
 
-    public void SetSuffix(string suffix)
+    private void SetAffix(ref string currentAffix, string newAffix, GameObject tile, Text displayText)
     {
-        currentSuffix = suffix ?? "";
-        UpdateAffixDisplay(suffixTile, suffixText, currentSuffix);
+        currentAffix = newAffix ?? "";
+        UpdateAffixDisplay(tile, displayText, currentAffix);
         UpdateSubmitButtonState();
     }
 
@@ -216,15 +183,13 @@ public class WordBuildingScript : MonoBehaviour
     {
         bool hasAffix = !string.IsNullOrEmpty(affixValue);
         
-        if (displayText != null)
-            displayText.text = affixValue;
+        if (displayText != null) displayText.text = affixValue;
             
         if (tile != null)
         {
             SetTileComponentsEnabled(tile, hasAffix);
             var tileText = tile.GetComponentInChildren<Text>(true);
-            if (tileText != null)
-                tileText.text = affixValue;
+            if (tileText != null) tileText.text = affixValue;
         }
 
         UpdatePlayerWord();
@@ -232,76 +197,76 @@ public class WordBuildingScript : MonoBehaviour
 
     private void UpdatePlayerWord()
     {
-        if (player != null)
+        if (player == null) return;
+
+        ResetPlayerQueue();
+
+        if (IsOnlyRootWord())
         {
-            player.queueDamage = 0;
-            player.queueScore = 0;
-
-            if (string.IsNullOrEmpty(currentPrefix) && string.IsNullOrEmpty(currentSuffix))
-            {
-                Debug.Log("Only root word displayed.");
-                return;
-            }
-
-            string playWord = currentPrefix + currentRootWord + currentSuffix;
-            bool isValidWord = validWordDetector.IsValidWord(playWord);
-
-            if (!isValidWord)
-            {
-                Debug.Log($"Invalid word: {playWord}");
-                return;
-            }
-
-            player.playWord = playWord;
-            Debug.Log($"Player word updated: {playWord}");
-
-            CalculateAndUpdateQueueValues(playWord);
-            Debug.Log($"Queue Damage: {player.queueDamage}, Queue Score: {player.queueScore} for word: {playWord}; Environmental: {player.isEnvironmentalWord}");
+            Debug.Log("Only root word displayed.");
+            return;
         }
+
+        string playWord = currentPrefix + currentRootWord + currentSuffix;
+        if (!validWordDetector.IsValidWord(playWord))
+        {
+            Debug.Log($"Invalid word: {playWord}");
+            return;
+        }
+
+        ProcessValidPlayerWord(playWord);
+    }
+
+    private void ResetPlayerQueue()
+    {
+        player.queueDamage = 0;
+        player.queueScore = 0;
+    }
+
+    private bool IsOnlyRootWord() => string.IsNullOrEmpty(currentPrefix) && string.IsNullOrEmpty(currentSuffix);
+
+    private void ProcessValidPlayerWord(string playWord)
+    {
+        player.playWord = playWord;
+        CalculateAndUpdateQueueValues(playWord);
+        Debug.Log($"Player word updated: {playWord}");
+        Debug.Log($"Queue Damage: {player.queueDamage}, Queue Score: {player.queueScore} for word: {playWord}; Environmental: {player.isEnvironmentalWord}");
     }
 
     private void CalculateAndUpdateQueueValues(string playWord)
     {
-        string wordDefinition = validWordDetector.GetWordDefinition(playWord);
-        SetDefinition(wordDefinition);
-
+        SetDefinition(validWordDetector.GetWordDefinition(playWord));
+        
         bool isEnvironmentalWord = validWordDetector.IsEnvironmentalWord(playWord);
+        int multiplier = isEnvironmentalWord ? 2 : 1;
 
-        // Calculate base damage and score
-        int baseDamage = WordScoringScript.CalculateDamageToEnemy(playWord);
-        int baseScore = WordScoringScript.CalculateWordScore(playWord);
-
-        // Apply multiplier for environmental words
-        int finalDamage = isEnvironmentalWord ? baseDamage * 2 : baseDamage;
-        int finalScore = isEnvironmentalWord ? baseScore * 2 : baseScore;
-
-        player.queueDamage = finalDamage;
-        player.queueScore = finalScore;
+        player.queueDamage = WordScoringScript.CalculateDamageToEnemy(playWord) * multiplier;
+        player.queueScore = WordScoringScript.CalculateWordScore(playWord) * multiplier;
         player.isEnvironmentalWord = isEnvironmentalWord;
     }
 
     private void SetTileComponentsEnabled(GameObject tile, bool enabled)
     {
         if (tile == null) return;
-        var image = tile.GetComponent<Image>();
-        if (image != null)
+        
+        SetComponentAlpha(tile.GetComponent<Image>(), enabled);
+        SetButtonInteractable(tile.GetComponent<Button>(), enabled);
+        SetComponentAlpha(tile.GetComponentInChildren<Text>(true), enabled);
+    }
+
+    private void SetComponentAlpha(Graphic component, bool enabled)
+    {
+        if (component != null)
         {
-            Color c = image.color;
+            Color c = component.color;
             c.a = enabled ? 1f : 0f;
-            image.color = c;
+            component.color = c;
         }
-        var button = tile.GetComponent<Button>();
-        if (button != null)
-        {
-            button.interactable = enabled;
-        }
-        var text = tile.GetComponentInChildren<Text>(true);
-        if (text != null)
-        {
-            Color c = text.color;
-            c.a = enabled ? 1f : 0f;
-            text.color = c;
-        }
+    }
+
+    private void SetButtonInteractable(Button button, bool enabled)
+    {
+        if (button != null) button.interactable = enabled;
     }
 
     public void SetDefinition(string definition)
@@ -357,35 +322,22 @@ public class WordBuildingScript : MonoBehaviour
 
     private void SetupDropZones()
     {
-        // Add drag functionality to prefix and suffix tiles
-        if (prefixTile != null)
-        {
-            AddDragFunctionality(prefixTile, "", true);
-        }
-        if (suffixTile != null)
-        {
-            AddDragFunctionality(suffixTile, "", true);
-        }
+        AddDragFunctionality(prefixTile, "", true);
+        AddDragFunctionality(suffixTile, "", true);
     }
 
     private void AddDragFunctionality(GameObject tile, string affixText, bool isDropZone)
     {
-        // Add drag handler
-        DragHandler dragHandler = tile.GetComponent<DragHandler>();
-        if (dragHandler == null)
-        {
-            dragHandler = tile.AddComponent<DragHandler>();
-        }
+        if (tile == null) return;
+
+        // Add or get drag handler
+        var dragHandler = tile.GetComponent<DragHandler>() ?? tile.AddComponent<DragHandler>();
         dragHandler.Initialize(this, affixText, isDropZone);
 
-        // Add drop zone functionality if it's a prefix/suffix tile
+        // Add drop zone functionality if needed
         if (isDropZone)
         {
-            DropZone dropZone = tile.GetComponent<DropZone>();
-            if (dropZone == null)
-            {
-                dropZone = tile.AddComponent<DropZone>();
-            }
+            var dropZone = tile.GetComponent<DropZone>() ?? tile.AddComponent<DropZone>();
             dropZone.Initialize(this, tile == prefixTile);
         }
     }
@@ -399,20 +351,17 @@ public class WordBuildingScript : MonoBehaviour
     private void HideOriginalTileIfNeeded(GameObject draggedTile)
     {
         if (draggedTile == prefixTile || draggedTile == suffixTile)
-        {
             SetTileComponentsEnabled(draggedTile, false);
-        }
     }
 
     private void CreateDraggedTileClone(GameObject originalTile, string affixText, Vector2 startPosition)
     {
         currentDraggedTile = Instantiate(originalTile, canvas.transform);
-        currentDraggedTile.name = "DraggedTile_" + affixText;
+        currentDraggedTile.name = $"DraggedTile_{affixText}";
 
         SetupDraggedTileTransform(originalTile, startPosition);
         CleanupDraggedTileComponents();
         ConfigureDraggedTileAppearance(affixText);
-        SetupDraggedTileVisibility();
     }
 
     private void SetupDraggedTileTransform(GameObject originalTile, Vector2 startPosition)
@@ -456,50 +405,36 @@ public class WordBuildingScript : MonoBehaviour
 
     private void CleanupDraggedTileComponents()
     {
-        var dragHandlers = currentDraggedTile.GetComponents<DragHandler>();
-        var dropZones = currentDraggedTile.GetComponents<DropZone>();
+        DestroyComponents<DragHandler>(currentDraggedTile);
+        DestroyComponents<DropZone>(currentDraggedTile);
+    }
 
-        foreach (var handler in dragHandlers)
-            DestroyImmediate(handler);
-        foreach (var zone in dropZones)
-            DestroyImmediate(zone);
+    private void DestroyComponents<T>(GameObject target) where T : Component
+    {
+        var components = target.GetComponents<T>();
+        foreach (var component in components)
+            DestroyImmediate(component);
     }
 
     private void ConfigureDraggedTileAppearance(string affixText)
     {
         var button = currentDraggedTile.GetComponent<Button>();
-        if (button != null) button.interactable = false;
-
         var text = currentDraggedTile.GetComponentInChildren<Text>();
+        
+        if (button != null) button.interactable = false;
         if (text != null) text.text = affixText;
 
         currentDraggedTile.SetActive(true);
         SetTileComponentsEnabled(currentDraggedTile, true);
     }
 
-    private void SetupDraggedTileVisibility()
-    {
-        currentDraggedTile.transform.SetAsLastSibling();
-
-        var canvasGroup = currentDraggedTile.GetComponent<CanvasGroup>();
-        if (canvasGroup == null)
-            canvasGroup = currentDraggedTile.AddComponent<CanvasGroup>();
-        canvasGroup.blocksRaycasts = false;
-    }
-
     public void UpdateDrag(Vector2 position)
     {
-        if (currentDraggedTile != null)
+        if (currentDraggedTile?.GetComponent<RectTransform>() is RectTransform rectTransform)
         {
-            RectTransform rectTransform = currentDraggedTile.GetComponent<RectTransform>();
-            if (rectTransform != null)
+            if (RectTransformUtility.ScreenPointToLocalPointInRectangle(
+                canvas.transform as RectTransform, position, canvas.worldCamera, out Vector2 localPos))
             {
-                Vector2 localPos;
-                RectTransformUtility.ScreenPointToLocalPointInRectangle(
-                    canvas.transform as RectTransform,
-                    position,
-                    canvas.worldCamera,
-                    out localPos);
                 rectTransform.localPosition = localPos;
             }
         }
@@ -511,28 +446,7 @@ public class WordBuildingScript : MonoBehaviour
         {
             if (wasDropped)
             {
-                // Set the new position
-                if (isPrefix)
-                    SetPrefix(droppedAffix);
-                else
-                    SetSuffix(droppedAffix);
-                
-                // If dragging from one drop zone to another, clear the original position
-                if (wasFromDropZone)
-                {
-                    // If moved to different zone, clear the original
-                    if (wasOriginallyPrefix && !isPrefix)
-                    {
-                        // Moved from prefix to suffix, clear prefix
-                        SetPrefix("");
-                    }
-                    else if (!wasOriginallyPrefix && isPrefix)
-                    {
-                        // Moved from suffix to prefix, clear suffix
-                        SetSuffix("");
-                    }
-                    // If moved to same zone (wasOriginallyPrefix == isPrefix), don't clear anything
-                }
+                ProcessDroppedTile(isPrefix, droppedAffix, wasFromDropZone, wasOriginallyPrefix);
             }
 
             Destroy(currentDraggedTile);
@@ -540,12 +454,24 @@ public class WordBuildingScript : MonoBehaviour
         }
     }
 
+    private void ProcessDroppedTile(bool isPrefix, string droppedAffix, bool wasFromDropZone, bool wasOriginallyPrefix)
+    {
+        // Set the new position
+        if (isPrefix) SetPrefix(droppedAffix);
+        else SetSuffix(droppedAffix);
+        
+        // Handle zone-to-zone movement
+        if (wasFromDropZone && wasOriginallyPrefix != isPrefix)
+        {
+            if (wasOriginallyPrefix) SetPrefix("");
+            else SetSuffix("");
+        }
+    }
+
     public void RemoveAffix(GameObject affixTile)
     {
-        if (affixTile == prefixTile)
-            SetPrefix("");
-        else if (affixTile == suffixTile)
-            SetSuffix("");
+        if (affixTile == prefixTile) SetPrefix("");
+        else if (affixTile == suffixTile) SetSuffix("");
     }
 
     #region Timer Methods
@@ -565,76 +491,54 @@ public class WordBuildingScript : MonoBehaviour
 
     private void UpdateTimerUI()
     {
-        if (timerBar != null)
-        {
-            timerBar.value = currentTime / maxTime;
-        }
-
-        if (timerText != null)
-        {
-            timerText.text = Mathf.Ceil(currentTime).ToString("F0");
-        }
+        if (timerBar != null) timerBar.value = currentTime / maxTime;
+        if (timerText != null) timerText.text = Mathf.Ceil(currentTime).ToString("F0");
     }
 
     private void OnTimerExpired()
     {
         Debug.Log("Timer expired! Player takes damage based on root word.");
         
-        // Stop the timer
         StopTimer();
+        ApplyTimerDamage();
+        CleanupAfterTimer();
+    }
 
-        // Calculate damage to player based on root word only
+    private void ApplyTimerDamage()
+    {
         int damageToPlayer = WordScoringScript.CalculateDamageToPlayer(currentRootWord);
-        
-        // Apply damage to player
         if (player != null)
         {
             player.SubtractHealth(damageToPlayer);
             Debug.Log($"Player takes {damageToPlayer} damage for not submitting word in time (Root word: {currentRootWord})");
         }
+    }
 
-        // Hide word building display
-        if (WordBuildingDisplay != null)
-        {
-            WordBuildingDisplay.SetActive(false);
-        }
-
-        // Reset tiles
-        if (prefixTile != null) SetTileComponentsEnabled(prefixTile, false);
-        if (suffixTile != null) SetTileComponentsEnabled(suffixTile, false);
-
-        // End word building phase
-        if (player != null)
-        {
-            player.EndWordBuilding();
-        }
+    private void CleanupAfterTimer()
+    {
+        WordBuildingDisplay?.SetActive(false);
+        SetTileComponentsEnabled(prefixTile, false);
+        SetTileComponentsEnabled(suffixTile, false);
+        player?.EndWordBuilding();
     }
     #endregion
 
     #region Panel Management
     private void SetPanelStates(bool showYourTiles)
     {
-        if (yourTiles != null)
-            yourTiles.SetActive(showYourTiles);
-        
-        if (createCustomTiles != null)
-            createCustomTiles.SetActive(!showYourTiles);
+        yourTiles?.SetActive(showYourTiles);
+        createCustomTiles?.SetActive(!showYourTiles);
     }
 
     private void OnCreateCustomTileClicked()
     {
-        SetPanelStates(false); // Hide yourTiles, show createCustomTiles
-        
-        // Initialize custom tile creation
-        if (customTileCreating != null)
-        {
-            customTileCreating.InitializeCustomTileCreation();
-        }
+        SetPanelStates(false);
+        customTileCreating?.InitializeCustomTileCreation();
     }
 
     public void OnBackButtonClicked()
     {
-        SetPanelStates(true); // Show yourTiles, hide createCustomTiles
+        SetPanelStates(true);
         CreateAffixTiles();
     }
     #endregion
