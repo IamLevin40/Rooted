@@ -35,6 +35,13 @@ public class PlayerScript : MonoBehaviour
     public bool onWordBuildingPhase = false;
     #endregion
 
+    #region Projectile Fields
+    [Header("Projectile Settings")]
+    public GameObject projectilePrefab;
+    public EnemyScript enemy;
+    private GameObject currentProjectile = null;
+    #endregion
+
     #region Unity Methods
     private void Start()
     {
@@ -154,6 +161,41 @@ public class PlayerScript : MonoBehaviour
     {
         playWord = prefix + root + suffix;
         Debug.Log(playWord);
+    }
+
+    public void SpawnPlayerProjectile(int damage, int score)
+    {
+        if (projectilePrefab == null || enemy == null) return;
+
+        // Spawn projectile on left or right side of player
+        bool right = Random.value > 0.5f;
+        float minOffset = 1.5f, maxOffset = 2.5f;
+        float xOffset = (right ? 1 : -1) * Random.Range(minOffset, maxOffset);
+        float yOffset = Random.Range(0f, 0.75f);
+        Vector3 spawnPos = transform.position + new Vector3(xOffset, yOffset, 0);
+        
+        GameObject proj = Instantiate(projectilePrefab, spawnPos, Quaternion.identity, this.transform);
+        currentProjectile = proj;
+        
+        PlayerProjectile pp = proj.GetComponent<PlayerProjectile>();
+        if (pp != null)
+        {
+            pp.moveRight = right;
+            pp.player = this;
+            pp.enemy = enemy;
+            pp.spawnOrigin = spawnPos;
+            pp.projectileWord = playWord;
+            pp.damage = damage;
+            pp.score = score;
+        }
+    }
+
+    public void OnProjectileDestroyed(GameObject proj)
+    {
+        if (currentProjectile == proj)
+        {
+            currentProjectile = null;
+        }
     }
     #endregion
 }

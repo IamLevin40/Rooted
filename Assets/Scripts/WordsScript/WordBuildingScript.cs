@@ -90,18 +90,6 @@ public class WordBuildingScript : MonoBehaviour
         Debug.Log($"Word building started with root word: {rootWord}");
     }
 
-    public void OnEndWordBuilding()
-    {
-        if (WordBuildingDisplay != null)
-        {
-            WordBuildingDisplay.SetActive(false);
-        }
-        if (player != null)
-        {
-            player.EndWordBuilding();
-        }
-    }
-
     private void UpdateWordDisplay()
     {
         // Update prefix display
@@ -136,50 +124,47 @@ public class WordBuildingScript : MonoBehaviour
     public void OnWordSubmit()
     {
         string combinedWord = currentPrefix + currentRootWord + currentSuffix;
-        
+
         Debug.Log($"Word submitted: {combinedWord} (Prefix: '{currentPrefix}', Root: '{currentRootWord}', Suffix: '{currentSuffix}')");
-        
+
         // Check if the word is valid first
         bool isValidWord = WordScoringScript.IsValidWord(combinedWord);
-        
+
         if (isValidWord)
         {
+            if (WordBuildingDisplay != null)
+            {
+                WordBuildingDisplay.SetActive(false);
+            }
+
             // Check if it's also an environmental word
             bool isEnvironmentalWord = WordScoringScript.IsEnvironmentalWord(combinedWord);
-            
+
             // Calculate base damage and score
             int baseDamage = WordScoringScript.CalculateDamage(combinedWord);
             int baseScore = WordScoringScript.CalculateWordScore(combinedWord);
-            
+
             // Apply multiplier for environmental words
             int finalDamage = isEnvironmentalWord ? baseDamage * 2 : baseDamage;
             int finalScore = isEnvironmentalWord ? baseScore * 2 : baseScore;
-            
-            // Apply damage to enemy
-            if (enemy != null)
-            {
-                enemy.SubtractHealth(finalDamage);
-                string wordType = isEnvironmentalWord ? "environmental" : "valid";
-                Debug.Log($"Enemy takes {finalDamage} damage from {wordType} word: {combinedWord}");
-            }
-            
-            // Add score to player
+
+            // Spawn projectile instead of immediately applying damage/score
             if (player != null)
             {
-                player.AddScore(finalScore);
                 string wordType = isEnvironmentalWord ? "environmental" : "valid";
-                Debug.Log($"Player gains {finalScore} points from {wordType} word: {combinedWord}");
+                Debug.Log($"Spawning projectile for {wordType} word: {combinedWord} (Damage: {finalDamage}, Score: {finalScore})");
+                player.SpawnPlayerProjectile(finalDamage, finalScore);
             }
         }
         else
         {
-            Debug.Log($"Invalid word: {combinedWord} - No damage or score awarded");
+            Debug.Log($"Invalid word: {combinedWord} - No projectile spawned");
+            return;
         }
 
-        // Reset tiles and end word building phase
+        // Reset tiles (but don't end word building yet for valid words - projectile will handle that)
         if (prefixTile != null) SetTileComponentsEnabled(prefixTile, false);
         if (suffixTile != null) SetTileComponentsEnabled(suffixTile, false);
-        OnEndWordBuilding();
     }
 
     public void SetPrefix(string prefix)
