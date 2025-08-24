@@ -24,6 +24,11 @@ public class WordBuildingScript : MonoBehaviour
     [Header("Submit Button")]
     public Button wordSubmitButton;
 
+    [Header("Timer")]
+    public Slider timerBar;
+    public Text timerText;
+    public float maxTime = 20f;
+
     [Header("Affix Tiles")]
     public GameObject affixContent;
     public GameObject affixTilePrefab;
@@ -37,6 +42,8 @@ public class WordBuildingScript : MonoBehaviour
     private List<string> affixesList;
     private GameObject currentDraggedTile;
     private Canvas canvas;
+    private float currentTime;
+    private bool timerRunning = false;
     #endregion
 
     private void Start()
@@ -63,6 +70,20 @@ public class WordBuildingScript : MonoBehaviour
         UpdateSubmitButtonState();
     }
 
+    private void Update()
+    {
+        if (timerRunning)
+        {
+            currentTime -= Time.deltaTime;
+            UpdateTimerUI();
+
+            if (currentTime <= 0f)
+            {
+                OnTimerExpired();
+            }
+        }
+    }
+
     public void OnStartWordBuilding(string rootWord)
     {
         if (WordBuildingDisplay != null)
@@ -86,6 +107,9 @@ public class WordBuildingScript : MonoBehaviour
         UpdateWordDisplay();
         UpdateSubmitButtonState();
         UpdatePlayerWord();
+
+        // Start timer
+        StartTimer();
 
         Debug.Log($"Word building started with root word: {rootWord}");
     }
@@ -124,6 +148,9 @@ public class WordBuildingScript : MonoBehaviour
     public void OnWordSubmit()
     {
         string combinedWord = currentPrefix + currentRootWord + currentSuffix;
+
+        // Stop the timer
+        StopTimer();
 
         // Check if the word is valid first
         bool isValidWord = WordScoringScript.IsValidWord(combinedWord);
@@ -204,7 +231,7 @@ public class WordBuildingScript : MonoBehaviour
             bool isEnvironmentalWord = WordScoringScript.IsEnvironmentalWord(playWord);
 
             // Calculate base damage and score
-            int baseDamage = WordScoringScript.CalculateDamage(playWord);
+            int baseDamage = WordScoringScript.CalculateDamageToEnemy(playWord);
             int baseScore = WordScoringScript.CalculateWordScore(playWord);
 
             // Apply multiplier for environmental words
@@ -466,4 +493,67 @@ public class WordBuildingScript : MonoBehaviour
         else if (affixTile == suffixTile)
             SetSuffix("");
     }
+
+    #region Timer Methods
+    private void StartTimer()
+    {
+        currentTime = maxTime;
+        timerRunning = true;
+        UpdateTimerUI();
+        Debug.Log($"Timer started: {maxTime} seconds");
+    }
+
+    private void StopTimer()
+    {
+        timerRunning = false;
+        Debug.Log("Timer stopped");
+    }
+
+    private void UpdateTimerUI()
+    {
+        if (timerBar != null)
+        {
+            timerBar.value = currentTime / maxTime;
+        }
+
+        if (timerText != null)
+        {
+            timerText.text = Mathf.Ceil(currentTime).ToString("F0");
+        }
+    }
+
+    private void OnTimerExpired()
+    {
+        Debug.Log("Timer expired! Player takes damage based on root word.");
+        
+        // Stop the timer
+        StopTimer();
+
+        // Calculate damage to player based on root word only
+        int damageToPlayer = WordScoringScript.CalculateDamageToPlayer(currentRootWord);
+        
+        // Apply damage to player
+        if (player != null)
+        {
+            player.SubtractHealth(damageToPlayer);
+            Debug.Log($"Player takes {damageToPlayer} damage for not submitting word in time (Root word: {currentRootWord})");
+        }
+
+        // Hide word building display
+        if (WordBuildingDisplay != null)
+        {
+            WordBuildingDisplay.SetActive(false);
+        }
+
+        // Reset tiles
+        if (prefixTile != null) SetTileComponentsEnabled(prefixTile, false);
+        if (suffixTile != null) SetTileComponentsEnabled(suffixTile, false);
+
+        // End word building phase
+        if (player != null)
+        {
+            player.EndWordBuilding();
+        }
+    }
+    #endregion
 }

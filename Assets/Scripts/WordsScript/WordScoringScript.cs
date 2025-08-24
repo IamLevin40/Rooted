@@ -26,10 +26,25 @@ public class WordScoringScript : MonoBehaviour
         return totalScore;
     }
 
-    public static int CalculateDamage(string word)
+    public static int CalculateDamageToEnemy(string word)
     {
         if (string.IsNullOrEmpty(word)) return 0;
         return word.Length;
+    }
+
+    public static int CalculateDamageToPlayer(string word)
+    {
+        if (string.IsNullOrEmpty(word)) return 0;
+        
+        int totalScore = 0;
+        foreach (char letter in word.ToUpper())
+        {
+            if (letterScores.ContainsKey(letter))
+            {
+                totalScore += letterScores[letter];
+            }
+        }
+        return totalScore;
     }
 
     public static bool IsValidWord(string word)
