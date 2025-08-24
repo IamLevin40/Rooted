@@ -8,7 +8,7 @@ public class DragHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
     private string affixText;
     private bool isDropZone;
     private bool isDragging = false;
-    private bool wasOriginallyPrefix; // Track if this tile was originally in prefix position
+    private bool wasOriginallyPrefix;
 
     public void Initialize(WordBuildingScript wordBuildingScript, string text, bool dropZone)
     {
@@ -25,16 +25,7 @@ public class DragHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
         
         if (isDropZone)
         {
-            var text = GetComponentInChildren<Text>();
-            if (text != null && !string.IsNullOrEmpty(text.text))
-            {
-                affixText = text.text;
-                
-                // Determine if this is originally a prefix or suffix tile
-                wasOriginallyPrefix = wordBuilding.prefixTile == gameObject;
-                
-                wordBuilding.StartDrag(gameObject, affixText, eventData.position);
-            }
+            HandleDropZoneDrag(eventData);
         }
         else
         {
@@ -42,11 +33,21 @@ public class DragHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
         }
     }
 
+    private void HandleDropZoneDrag(PointerEventData eventData)
+    {
+        var text = GetComponentInChildren<Text>();
+        if (text != null && !string.IsNullOrEmpty(text.text))
+        {
+            affixText = text.text;
+            wasOriginallyPrefix = wordBuilding.prefixTile == gameObject;
+            wordBuilding.StartDrag(gameObject, affixText, eventData.position);
+        }
+    }
+
     public void OnDrag(PointerEventData eventData)
     {
-        if (wordBuilding == null || !isDragging) return;
-        
-        wordBuilding.UpdateDrag(eventData.position);
+        if (wordBuilding != null && isDragging)
+            wordBuilding.UpdateDrag(eventData.position);
     }
 
     public void OnEndDrag(PointerEventData eventData)
@@ -54,10 +55,16 @@ public class DragHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
         if (wordBuilding == null || !isDragging) return;
         
         isDragging = false;
+        var (wasDropped, isPrefix) = DetectDropZone(eventData);
         
-        bool wasDropped = false;
-        bool isPrefix = false;
+        if (isDropZone && !wasDropped)
+            wordBuilding.RemoveAffix(gameObject);
         
+        wordBuilding.EndDrag(wasDropped, isPrefix, affixText, isDropZone, wasOriginallyPrefix);
+    }
+
+    private (bool wasDropped, bool isPrefix) DetectDropZone(PointerEventData eventData)
+    {
         var results = new System.Collections.Generic.List<RaycastResult>();
         EventSystem.current.RaycastAll(eventData, results);
         
@@ -65,19 +72,9 @@ public class DragHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
         {
             var dropZone = result.gameObject.GetComponent<DropZone>();
             if (dropZone != null)
-            {
-                wasDropped = true;
-                isPrefix = dropZone.IsPrefix();
-                break;
-            }
+                return (true, dropZone.IsPrefix());
         }
         
-        if (isDropZone && !wasDropped)
-        {
-            wordBuilding.RemoveAffix(gameObject);
-        }
-        
-        // Pass information about the original position to EndDrag
-        wordBuilding.EndDrag(wasDropped, isPrefix, affixText, isDropZone, wasOriginallyPrefix);
+        return (false, false);
     }
 }
