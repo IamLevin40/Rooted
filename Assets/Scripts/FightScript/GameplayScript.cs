@@ -3,22 +3,29 @@ using UnityEngine.UI;
 
 public class GameplayScript : MonoBehaviour
 {
+    #region References
     public PlayerScript player;
     public EnemyScript enemy;
+    #endregion
 
+    #region Countdown UI Fields
     [Header("Countdown UI")]
     public GameObject CountdownDisplay;
     public Image dot1;
     public Image dot2;
     public Text countdownText;
+    #endregion
 
+    #region State Fields
     [HideInInspector] public bool gameActive = false;
     [HideInInspector] public bool gameEnded = false;
     private float countdownTimer = 3f;
     private int lastCountdownInt = 4;
     private bool fightDisplayed = false;
     private float fightDisplayTimer = 0f;
+    #endregion
 
+    #region Unity Methods
     private void Start()
     {
         gameActive = false;
@@ -55,7 +62,6 @@ public class GameplayScript : MonoBehaviour
         if (gameEnded)
             return;
 
-        // Check for victory/defeat
         if (player.currentHealth <= 0 && !gameEnded)
         {
             Defeat();
@@ -66,11 +72,11 @@ public class GameplayScript : MonoBehaviour
             Victory();
             return;
         }
-
-        // Place player/enemy logic here (only runs if gameActive and not ended)
-        // Debug.Log("Game logic running...");
+        // ...existing code for main gameplay loop...
     }
+    #endregion
 
+    #region Countdown Methods
     private void HandleCountdown()
     {
         if (gameEnded) return;
@@ -126,7 +132,9 @@ public class GameplayScript : MonoBehaviour
                 break;
         }
     }
+    #endregion
 
+    #region End State Methods
     private void Defeat()
     {
         if (gameEnded) return;
@@ -140,4 +148,5 @@ public class GameplayScript : MonoBehaviour
         gameEnded = true;
         Debug.Log("Victory");
     }
+    #endregion
 }

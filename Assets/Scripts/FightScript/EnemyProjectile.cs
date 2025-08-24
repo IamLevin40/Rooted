@@ -4,6 +4,9 @@ using System.Collections.Generic;
 
 public class EnemyProjectile : MonoBehaviour
 {
+    #region Inspector Fields
+    [Header("Projectile Settings")]
+    public float projectileDamage = 5f;
     public float maxSpeed = 4f;
     public float acceleration = 1.5f;
     public float initialSpeed = 0f;
@@ -11,23 +14,28 @@ public class EnemyProjectile : MonoBehaviour
     public float curveAmplitude = 1.2f;
     public float curveFrequency = 1.2f;
     public bool moveRight = true;
+    [Header("References")]
     public EnemyScript enemy;
     public PlayerScript player;
+    public Button interactButton;
+    public Text wordText;
+    #endregion
+
+    #region Runtime Fields
     public Vector3 spawnOrigin;
+    public string rootWord = "";
+    private static List<string> rootWordsList;
     private bool hasHitPlayer = false;
     private float t = 0f;
     private float currentSpeed = 0f;
-    public Button interactButton;
-    public Text wordText;
-    public string rootWord = "";
-    private static List<string> rootWordsList;
+    #endregion
 
     private void Start()
     {
+        // Register interaction event
         if (interactButton != null)
-        {
             interactButton.onClick.AddListener(OnProjectileInteract);
-        }
+
         currentSpeed = initialSpeed;
         SetRandomRootWord();
     }
@@ -37,7 +45,7 @@ public class EnemyProjectile : MonoBehaviour
         if (player == null || enemy == null) return;
         Transform playerTransform = player.transform;
         t += Time.deltaTime;
-        UpdateProjectileMovement(playerTransform);
+        MoveProjectile(playerTransform);
         CheckPlayerCollision(playerTransform);
     }
 
@@ -75,7 +83,7 @@ public class EnemyProjectile : MonoBehaviour
         }
     }
 
-    private void UpdateProjectileMovement(Transform playerTransform)
+    private void MoveProjectile(Transform playerTransform)
     {
         // Initial slow movement, then accelerate
         if (t < initialSlowDuration)
@@ -108,7 +116,7 @@ public class EnemyProjectile : MonoBehaviour
     {
         if (!hasHitPlayer && Vector3.Distance(transform.position, playerTransform.position) < 0.5f)
         {
-            player.SubtractHealth(5);
+            player.SubtractHealth((int)projectileDamage);
             hasHitPlayer = true;
             if (player != null) player.rootWord = "";
             if (enemy != null) enemy.OnProjectileDestroyed(gameObject);
@@ -116,12 +124,11 @@ public class EnemyProjectile : MonoBehaviour
         }
     }
 
-    // Call this from the Button's OnClick event
     public void OnProjectileInteract()
     {
         if (enemy != null)
         {
-            enemy.SubtractHealth(5);
+            enemy.SubtractHealth(projectileDamage);
             enemy.OnProjectileDestroyed(gameObject);
         }
         if (player != null)
