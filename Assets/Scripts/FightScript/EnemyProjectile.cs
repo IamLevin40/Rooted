@@ -53,7 +53,7 @@ public class EnemyProjectile : MonoBehaviour
         
         if (rootWordsList?.Count > 0)
         {
-            rootWord = rootWordsList[Random.Range(0, rootWordsList.Count)];
+            rootWord = rootWordsList[Random.Range(0, rootWordsList.Count)].ToUpper();
             UpdateWordText();
         }
     }

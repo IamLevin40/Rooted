@@ -111,7 +111,7 @@ public class WordBuildingScript : MonoBehaviour
     {
         currentRootWord = rootWord;
         currentPrefix = currentSuffix = currentDefinition = "";
-        if (rootWordText != null) rootWordText.text = currentRootWord;
+        if (rootWordText != null) rootWordText.text = currentRootWord.ToUpper();
     }
 
     private void UpdateAllDisplays()
@@ -125,7 +125,8 @@ public class WordBuildingScript : MonoBehaviour
     {
         if (prefixText != null) prefixText.text = currentPrefix;
         if (suffixText != null) suffixText.text = currentSuffix;
-        if (definitionText != null) definitionText.text = currentDefinition;
+        if (definitionText != null)
+            definitionText.text = string.IsNullOrEmpty(currentDefinition) ? "No definition available for this word." : currentDefinition;
     }
 
     private void UpdateSubmitButtonState()
@@ -140,6 +141,8 @@ public class WordBuildingScript : MonoBehaviour
     public void OnWordSubmit()
     {
         string combinedWord = currentPrefix + currentRootWord + currentSuffix;
+        combinedWord = combinedWord.ToUpper();
+
         bool isValidWord = validWordDetector.IsValidWord(combinedWord);
 
         if (isValidWord)
@@ -175,6 +178,7 @@ public class WordBuildingScript : MonoBehaviour
     private void SetAffix(ref string currentAffix, string newAffix, GameObject tile, Text displayText)
     {
         currentAffix = newAffix ?? "";
+        currentAffix = currentAffix.ToUpper();
         UpdateAffixDisplay(tile, displayText, currentAffix);
         UpdateSubmitButtonState();
     }
@@ -203,14 +207,19 @@ public class WordBuildingScript : MonoBehaviour
 
         if (IsOnlyRootWord())
         {
+            SetDefinition(validWordDetector.GetWordDefinition(currentRootWord));
             Debug.Log("Only root word displayed.");
             return;
         }
 
         string playWord = currentPrefix + currentRootWord + currentSuffix;
+        playWord = playWord.ToUpper();
+
         if (!validWordDetector.IsValidWord(playWord))
         {
             Debug.Log($"Invalid word: {playWord}");
+            if (definitionText != null)
+                definitionText.text = "No word found on the dictionary. Let's try it again!";
             return;
         }
 
@@ -221,6 +230,7 @@ public class WordBuildingScript : MonoBehaviour
     {
         player.queueDamage = 0;
         player.queueScore = 0;
+        player.isEnvironmentalWord = false;
     }
 
     private bool IsOnlyRootWord() => string.IsNullOrEmpty(currentPrefix) && string.IsNullOrEmpty(currentSuffix);
@@ -288,7 +298,7 @@ public class WordBuildingScript : MonoBehaviour
         // Create tiles for all affixes
         foreach (string affix in allAffixes)
         {
-            CreateSingleAffixTile(affix);
+            CreateSingleAffixTile(affix.ToUpper());
         }
 
         Debug.Log($"Created {allAffixes.Count} affix tiles. {affixHandler.GetAffixStatistics()}");

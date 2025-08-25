@@ -93,7 +93,7 @@ public class AffixHandlingScript : MonoBehaviour
             return false;
         }
 
-        string normalizedAffix = newAffix.Trim().ToUpper();
+        string normalizedAffix = newAffix.Trim().ToLower();
 
         if (IsAffixDuplicate(normalizedAffix))
         {
@@ -111,7 +111,7 @@ public class AffixHandlingScript : MonoBehaviour
     {
         if (string.IsNullOrWhiteSpace(affixToRemove)) return false;
 
-        string normalizedAffix = affixToRemove.Trim().ToUpper();
+        string normalizedAffix = affixToRemove.Trim().ToLower();
         bool removed = customAffixes.Remove(normalizedAffix);
         
         if (removed)
@@ -131,9 +131,9 @@ public class AffixHandlingScript : MonoBehaviour
     {
         if (string.IsNullOrWhiteSpace(affix)) return false;
 
-        string normalizedAffix = affix.Trim().ToUpper();
-        return predefinedAffixes.Any(existingAffix => existingAffix.ToUpper() == normalizedAffix) ||
-               customAffixes.Any(existingCustomAffix => existingCustomAffix.ToUpper() == normalizedAffix);
+        string normalizedAffix = affix.Trim().ToLower();
+        return predefinedAffixes.Any(existingAffix => existingAffix.ToLower() == normalizedAffix) ||
+               customAffixes.Any(existingCustomAffix => existingCustomAffix.ToLower() == normalizedAffix);
     }
 
     public void ClearAllCustomAffixes()

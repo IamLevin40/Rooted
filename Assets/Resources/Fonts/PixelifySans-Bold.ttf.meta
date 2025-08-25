@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: 8b2128bb4f3c4c742a43f10a8199266a
+guid: a4d9b71b39c198543b2609bec83ceb7a
 TrueTypeFontImporter:
   externalObjects: {}
   serializedVersion: 4
@@ -9,8 +9,10 @@ TrueTypeFontImporter:
   characterPadding: 1
   includeFontData: 1
   fontNames:
-  - Kindly Rewind
-  fallbackFontReferences: []
+  - Pixelify Sans
+  fallbackFontReferences:
+  - {fileID: 12800000, guid: a26c623e6928be44b9a1d1c6606b230d, type: 3}
+  - {fileID: 12800000, guid: 7ddf75837545bf9489ec55b59fa8e4a2, type: 3}
   customCharacters: 
   fontRenderingMode: 2
   ascentCalculationMode: 1
