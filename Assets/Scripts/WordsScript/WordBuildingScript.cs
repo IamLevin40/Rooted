@@ -111,7 +111,7 @@ public class WordBuildingScript : MonoBehaviour
     {
         currentRootWord = rootWord;
         currentPrefix = currentSuffix = currentDefinition = "";
-        if (rootWordText != null) rootWordText.text = currentRootWord;
+        if (rootWordText != null) rootWordText.text = currentRootWord.ToUpper();
     }
 
     private void UpdateAllDisplays()
@@ -141,6 +141,8 @@ public class WordBuildingScript : MonoBehaviour
     public void OnWordSubmit()
     {
         string combinedWord = currentPrefix + currentRootWord + currentSuffix;
+        combinedWord = combinedWord.ToUpper();
+
         bool isValidWord = validWordDetector.IsValidWord(combinedWord);
 
         if (isValidWord)
@@ -176,6 +178,7 @@ public class WordBuildingScript : MonoBehaviour
     private void SetAffix(ref string currentAffix, string newAffix, GameObject tile, Text displayText)
     {
         currentAffix = newAffix ?? "";
+        currentAffix = currentAffix.ToUpper();
         UpdateAffixDisplay(tile, displayText, currentAffix);
         UpdateSubmitButtonState();
     }
@@ -210,6 +213,8 @@ public class WordBuildingScript : MonoBehaviour
         }
 
         string playWord = currentPrefix + currentRootWord + currentSuffix;
+        playWord = playWord.ToUpper();
+
         if (!validWordDetector.IsValidWord(playWord))
         {
             Debug.Log($"Invalid word: {playWord}");
@@ -293,7 +298,7 @@ public class WordBuildingScript : MonoBehaviour
         // Create tiles for all affixes
         foreach (string affix in allAffixes)
         {
-            CreateSingleAffixTile(affix);
+            CreateSingleAffixTile(affix.ToUpper());
         }
 
         Debug.Log($"Created {allAffixes.Count} affix tiles. {affixHandler.GetAffixStatistics()}");
