@@ -204,6 +204,7 @@ public class WordBuildingScript : MonoBehaviour
 
         if (IsOnlyRootWord())
         {
+            SetDefinition(validWordDetector.GetWordDefinition(currentRootWord));
             Debug.Log("Only root word displayed.");
             return;
         }
