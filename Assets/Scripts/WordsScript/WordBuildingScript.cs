@@ -125,7 +125,8 @@ public class WordBuildingScript : MonoBehaviour
     {
         if (prefixText != null) prefixText.text = currentPrefix;
         if (suffixText != null) suffixText.text = currentSuffix;
-        if (definitionText != null) definitionText.text = currentDefinition;
+        if (definitionText != null)
+            definitionText.text = string.IsNullOrEmpty(currentDefinition) ? "No definition available for this word." : currentDefinition;
     }
 
     private void UpdateSubmitButtonState()
@@ -211,6 +212,8 @@ public class WordBuildingScript : MonoBehaviour
         if (!validWordDetector.IsValidWord(playWord))
         {
             Debug.Log($"Invalid word: {playWord}");
+            if (definitionText != null)
+                definitionText.text = "No word found on the dictionary. Let's try it again!";
             return;
         }
 
@@ -221,6 +224,7 @@ public class WordBuildingScript : MonoBehaviour
     {
         player.queueDamage = 0;
         player.queueScore = 0;
+        player.isEnvironmentalWord = false;
     }
 
     private bool IsOnlyRootWord() => string.IsNullOrEmpty(currentPrefix) && string.IsNullOrEmpty(currentSuffix);
